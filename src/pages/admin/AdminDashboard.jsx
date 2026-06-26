@@ -44,7 +44,7 @@ const AdminDashboard = () => {
     <div className="space-y-5">
 
       {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard icon={HiOutlineCalendar}   iconBg="bg-gradient-to-br from-[#102167] to-[#3b4da8]" label="Total Events"    value={mockEvents.length} sub="This Semester"     subColor="text-gray-400" />
         <StatCard icon={HiOutlineUserGroup}   iconBg="bg-gradient-to-br from-[#ef7041] to-[#f48b62]" label="Total Students"  value={`${students.length * 50}+`} sub="Active Volunteers" subColor="text-[#ef7041]" />
         <StatCard icon={BsShieldCheck}        iconBg="bg-gradient-to-br from-emerald-400 to-green-500" label="Professors"    value={professors.length} sub="Faculty Members"  subColor="text-emerald-500" />
@@ -52,16 +52,16 @@ const AdminDashboard = () => {
       </div>
 
       {/* ── Row 2: Events + Quick Stats ── */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
 
         {/* Recent Events */}
-        <div className="col-span-3 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="xl:col-span-3 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-base font-extrabold text-gray-800 flex items-center gap-2">
               <HiOutlineCalendar size={18} className="text-[#102167]" /> Recent Events
             </h3>
-            <button className="text-xs font-bold text-[#102167] hover:text-[#ef7041] transition-colors flex items-center gap-1">
-              View All <FiArrowRight size={12} />
+            <button className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#102167] bg-[#eef2ff] px-3 py-1.5 rounded-lg hover:bg-[#102167] hover:text-white transition-all duration-200">
+              View All <FiArrowRight size={11} />
             </button>
           </div>
           <div className="space-y-3">
@@ -111,7 +111,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Right panel */}
-        <div className="col-span-2 space-y-4">
+        <div className="xl:col-span-2 space-y-4">
 
           {/* Platform Overview */}
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">

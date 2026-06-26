@@ -38,7 +38,7 @@ const AboutSection = () => (
             The aim of NSS is to develop the personality of students through selfless community service. The motto <strong className="text-[#ef7041]">"Not Me But You"</strong> reflects the essence of democratic living and the importance of placing others before oneself.
           </p>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-[#102167] text-white rounded-2xl p-5">
               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-3 text-lg">👁️</div>
               <h4 className="font-extrabold text-sm mb-2">Our Vision</h4>

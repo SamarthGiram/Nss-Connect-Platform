@@ -107,8 +107,8 @@ const HeroIllustration = () => (
 );
 
 /* ─── Feature card in bottom bar ─── */
-const Feature = ({ emoji, title, sub, border }) => (
-  <div className={`flex items-center gap-4 px-6 py-5 ${border ? 'border-r border-gray-100' : ''}`}>
+const Feature = ({ emoji, title, sub }) => (
+  <div className="flex items-center gap-4 px-6 py-5">
     <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center text-xl text-[#b8b0e8]">
       {emoji}
     </div>
@@ -127,7 +127,7 @@ const HeroSection = () => (
     <div className="absolute bottom-32 right-0 w-[220px] h-[220px] bg-[#f0edfc] rounded-full opacity-50 blur-2xl translate-x-10 pointer-events-none"></div>
 
     <div className="max-w-7xl mx-auto px-8">
-      <div className="grid grid-cols-2 gap-8 items-center" style={{ minHeight: 'calc(100vh - 130px)' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center" style={{ minHeight: 'calc(100vh - 130px)' }}>
 
         {/* ── LEFT ── */}
         <div className="space-y-6 py-12">
@@ -167,10 +167,10 @@ const HeroSection = () => (
 
     {/* ── Bottom Feature Bar ── */}
     <div className="mx-8 mb-8 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="grid grid-cols-4 divide-x divide-gray-100">
-        <Feature emoji="👥" title="Community Service" sub="Serve with heart" border />
-        <Feature emoji="🏅" title="Leadership" sub="Lead by example" border />
-        <Feature emoji="❤️" title="Social Responsibility" sub="Think for others" border />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+        <Feature emoji="👥" title="Community Service" sub="Serve with heart" />
+        <Feature emoji="🏅" title="Leadership" sub="Lead by example" />
+        <Feature emoji="❤️" title="Social Responsibility" sub="Think for others" />
         <Feature emoji="🏛️" title="Nation Building" sub="Work for the nation" />
       </div>
     </div>

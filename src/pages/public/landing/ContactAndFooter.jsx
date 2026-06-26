@@ -37,7 +37,7 @@ const ContactAndFooter = () => (
           <div className="bg-[#fdf8f4] rounded-2xl p-8 border border-[#f0e8de]">
             <h3 className="text-lg font-extrabold text-[#102167] mb-6">Send a Message</h3>
             <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Name</label>
                   <input type="text" placeholder="Your name"
