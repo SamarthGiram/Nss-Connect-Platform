@@ -1,180 +1,182 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowRight } from 'react-icons/fi';
-import nssLogo from '../../../assets/nss.png';
+import { FiArrowRight, FiUsers, FiAward, FiHeart, FiFlag } from 'react-icons/fi';
+import volunteerImg from '../../../assets/nss-volunteers.png';
 
-/* ─── SVG: Two hands holding NSS logo with leaves/birds ─── */
-const HeroIllustration = () => (
-  <div className="relative w-full h-full flex items-center justify-center">
-    <svg viewBox="0 0 480 420" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full max-w-[520px]">
+const CountUp = ({ end, duration = 1500, suffix = '+' }) => {
+  const [count, setCount] = useState(0);
 
-      {/* ── Background lavender blob top-right ── */}
-      <ellipse cx="420" cy="80" rx="110" ry="90" fill="#ece9f8" opacity="0.7" />
+  useEffect(() => {
+    let startTime = null;
+    const target = parseInt(end, 10);
+    
+    const step = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      setCount(Math.floor(progress * target));
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+    
+    requestAnimationFrame(step);
+  }, [end, duration]);
 
-      {/* ── Clouds / birds ── */}
-      {/* Cloud 1 */}
-      <g opacity="0.5">
-        <ellipse cx="300" cy="55" rx="28" ry="14" fill="#d9d5ef"/>
-        <ellipse cx="280" cy="62" rx="18" ry="12" fill="#d9d5ef"/>
-        <ellipse cx="318" cy="62" rx="18" ry="12" fill="#d9d5ef"/>
-      </g>
-      {/* Cloud 2 small */}
-      <g opacity="0.4">
-        <ellipse cx="420" cy="130" rx="18" ry="9" fill="#d9d5ef"/>
-        <ellipse cx="406" cy="135" rx="12" ry="8" fill="#d9d5ef"/>
-        <ellipse cx="432" cy="135" rx="12" ry="8" fill="#d9d5ef"/>
-      </g>
-      {/* Bird 1 */}
-      <path d="M340 90 Q345 85 350 90" stroke="#9b96cc" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-      <path d="M350 90 Q355 85 360 90" stroke="#9b96cc" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-      {/* Bird 2 */}
-      <path d="M395 165 Q399 161 403 165" stroke="#9b96cc" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-      <path d="M403 165 Q407 161 411 165" stroke="#9b96cc" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+  return <span>{count.toLocaleString()}{suffix}</span>;
+};
 
-      {/* ── LEFT HAND ── */}
-      <g>
-        {/* Palm */}
-        <path d="M145 320 C130 300 118 270 120 240 C122 220 130 200 148 188
-                 C158 182 165 188 166 198 L168 220
-                 C168 220 172 200 175 186 C178 175 188 172 194 180
-                 C200 188 198 210 196 225
-                 C196 225 202 205 206 193 C210 183 220 182 224 190
-                 C228 198 224 220 220 235
-                 C220 235 224 220 230 212 C236 205 244 207 246 216
-                 C248 225 244 250 238 268
-                 L228 300 C215 330 200 345 180 355 Z"
-          fill="none" stroke="#b8b0e8" strokeWidth="2.5" strokeLinejoin="round"/>
-        {/* Fingers hint lines */}
-        <path d="M168 220 L166 300" stroke="#b8b0e8" strokeWidth="1.5" opacity="0.6"/>
-        <path d="M196 225 L194 305" stroke="#b8b0e8" strokeWidth="1.5" opacity="0.6"/>
-        <path d="M220 235 L218 308" stroke="#b8b0e8" strokeWidth="1.5" opacity="0.6"/>
-        {/* Wrist */}
-        <path d="M145 320 Q155 340 180 355 Q200 365 228 358 L238 268" stroke="#b8b0e8" strokeWidth="2.5" fill="none"/>
-      </g>
+const HeroSection = () => {
+  const stats = [
+    { value: 120, suffix: '+', label: 'Events' },
+    { value: 2500, suffix: '+', label: 'Volunteers' },
+    { value: 50, suffix: '+', label: 'Communities' },
+    { value: 10, suffix: '+', label: 'Years of Service' },
+  ];
 
-      {/* ── RIGHT HAND ── */}
-      <g>
-        <path d="M335 320 C350 300 362 270 360 240 C358 220 350 200 332 188
-                 C322 182 315 188 314 198 L312 220
-                 C312 220 308 200 305 186 C302 175 292 172 286 180
-                 C280 188 282 210 284 225
-                 C284 225 278 205 274 193 C270 183 260 182 256 190
-                 C252 198 256 220 260 235
-                 C260 235 256 220 250 212 C244 205 236 207 234 216
-                 C232 225 236 250 242 268
-                 L252 300 C265 330 280 345 300 355 Z"
-          fill="none" stroke="#b8b0e8" strokeWidth="2.5" strokeLinejoin="round"/>
-        <path d="M312 220 L314 300" stroke="#b8b0e8" strokeWidth="1.5" opacity="0.6"/>
-        <path d="M284 225 L286 305" stroke="#b8b0e8" strokeWidth="1.5" opacity="0.6"/>
-        <path d="M260 235 L262 308" stroke="#b8b0e8" strokeWidth="1.5" opacity="0.6"/>
-        <path d="M335 320 Q325 340 300 355 Q280 365 252 358 L242 268" stroke="#b8b0e8" strokeWidth="2.5" fill="none"/>
-      </g>
+  return (
+    <section id="home" className="bg-[#fdf8f4] min-h-screen pt-[60px] flex flex-col justify-between overflow-hidden relative">
+      {/* Decorative Background Elements */}
+      {/* Soft gradient blobs */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#ece9f8] rounded-full opacity-50 blur-3xl translate-x-20 -translate-y-10 pointer-events-none z-0"></div>
+      <div className="absolute bottom-20 left-0 w-[450px] h-[450px] bg-[#fbf5f0] rounded-full opacity-60 blur-3xl -translate-x-10 pointer-events-none z-0"></div>
+      
+      {/* Circular rings decoration */}
+      <div className="absolute right-[-150px] top-[5%] w-[800px] h-[800px] rounded-full border border-gray-100/80 pointer-events-none z-0"></div>
+      <div className="absolute right-[-50px] top-[12%] w-[650px] h-[650px] rounded-full border border-dashed border-[#102167]/5 pointer-events-none z-0"></div>
 
-      {/* ── LEAVES LEFT ── */}
-      {/* Stem */}
-      <path d="M155 380 Q148 340 155 300 Q160 270 150 240" stroke="#b8b0e8" strokeWidth="2" fill="none" strokeLinecap="round"/>
-      {/* Leaves */}
-      <path d="M155 330 Q135 315 130 295 Q150 305 155 330Z" fill="#c8c2e8" opacity="0.7"/>
-      <path d="M152 305 Q128 290 130 268 Q150 278 152 305Z" fill="#b8b0e0" opacity="0.6"/>
-      <path d="M156 355 Q138 345 136 325 Q154 332 156 355Z" fill="#d0caf0" opacity="0.65"/>
-      <path d="M150 275 Q130 260 134 240 Q150 252 150 275Z" fill="#c0b8e4" opacity="0.55"/>
+      {/* Denser Dot Grid Patterns to fill space */}
+      <div className="absolute top-[20%] left-[2%] w-44 h-44 opacity-30 bg-[radial-gradient(#102167_1.8px,transparent_1.8px)] [background-size:16px_16px] hidden xl:block z-0"></div>
+      <div className="absolute bottom-[22%] right-[2%] w-48 h-48 opacity-30 bg-[radial-gradient(#ef7041_1.8px,transparent_1.8px)] [background-size:16px_16px] hidden xl:block z-0"></div>
+      <div className="absolute top-[42%] right-[45%] w-24 h-48 opacity-20 bg-[radial-gradient(#94a3b8_1.5px,transparent_1.5px)] [background-size:14px_14px] hidden lg:block z-0"></div>
 
-      {/* ── LEAVES RIGHT ── */}
-      <path d="M325 380 Q332 340 325 300 Q320 270 330 240" stroke="#b8b0e8" strokeWidth="2" fill="none" strokeLinecap="round"/>
-      <path d="M325 330 Q345 315 350 295 Q330 305 325 330Z" fill="#c8c2e8" opacity="0.7"/>
-      <path d="M328 305 Q352 290 350 268 Q330 278 328 305Z" fill="#b8b0e0" opacity="0.6"/>
-      <path d="M324 355 Q342 345 344 325 Q326 332 324 355Z" fill="#d0caf0" opacity="0.65"/>
-      <path d="M330 275 Q350 260 346 240 Q330 252 330 275Z" fill="#c0b8e4" opacity="0.55"/>
+      <div className="max-w-7xl mx-auto px-8 w-full flex-grow flex items-center z-10 py-6 lg:py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
+          
+          {/* ── LEFT COLUMN ── */}
+          <div className="lg:col-span-5 space-y-10 text-center lg:text-left">
+            {/* Accent Pill */}
+            <div className="inline-flex items-center gap-2 bg-[#ef7041]/10 text-[#ef7041] px-5 py-2 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-widest border border-[#ef7041]/20 shadow-sm">
+              🚀 National Service Scheme Connect
+            </div>
 
-      {/* ── Small bottom leaves ── */}
-      <path d="M195 395 Q180 378 185 360 Q198 372 195 395Z" fill="#c8c2e8" opacity="0.6"/>
-      <path d="M285 395 Q300 378 295 360 Q282 372 285 395Z" fill="#c8c2e8" opacity="0.6"/>
+            {/* Main Title */}
+            <h1 className="text-[56px] sm:text-[76px] lg:text-[88px] font-black leading-[1.04] tracking-tight">
+              <span className="block text-[#102167]">Not Me</span>
+              <span className="block text-[#ef7041] mt-1.5">But You</span>
+            </h1>
 
-      {/* ── Bottom-right lavender blob ── */}
-      <ellipse cx="440" cy="370" rx="80" ry="70" fill="#ece9f8" opacity="0.6"/>
-      {/* Extra leaves on right corner */}
-      <path d="M430 410 Q415 390 422 372 Q434 385 430 410Z" fill="#b8b0e0" opacity="0.5"/>
-      <path d="M455 400 Q442 382 448 365 Q460 377 455 400Z" fill="#c8c2e8" opacity="0.5"/>
-      <path d="M445 425 Q428 408 434 390 Q447 402 445 425Z" fill="#d0caf0" opacity="0.5"/>
-    </svg>
+            {/* Subtitle with Left Accent Bar */}
+            <div className="flex gap-4 items-stretch max-w-lg mx-auto lg:mx-0">
+              <div className="w-1.5 bg-gradient-to-b from-[#102167] to-[#ef7041] rounded-full hidden sm:block"></div>
+              <p className="text-base sm:text-[19px] text-gray-500 font-medium leading-relaxed text-center sm:text-left py-0.5">
+                Together we can create a better society and a stronger nation.
+              </p>
+            </div>
 
-    {/* ── NSS Logo floating above hands ── */}
-    <div className="absolute" style={{ top: '6%', left: '50%', transform: 'translateX(-50%)' }}>
-      <div className="w-[130px] h-[130px] rounded-full overflow-hidden border-4 border-[#102167]/30 shadow-2xl bg-white p-1">
-        <img src={nssLogo} alt="NSS" className="w-full h-full object-contain rounded-full" />
-      </div>
-    </div>
-  </div>
-);
+            {/* Explore More CTA Button */}
+            <div className="pt-2">
+              <Link to="/login"
+                className="inline-flex items-center gap-2 bg-[#102167] text-white font-bold px-10 py-5 rounded-full text-base sm:text-lg hover:bg-[#1a2f85] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 group">
+                Explore More
+                <FiArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+          </div>
 
-/* ─── Feature card in bottom bar ─── */
-const Feature = ({ emoji, title, sub, border }) => (
-  <div className={`flex items-center gap-4 px-6 py-5 ${border ? 'border-r border-gray-100' : ''}`}>
-    <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center text-xl text-[#b8b0e8]">
-      {emoji}
-    </div>
-    <div>
-      <p className="text-[13px] font-bold text-[#102167]">{title}</p>
-      <p className="text-[11px] text-gray-400 font-medium mt-0.5">{sub}</p>
-    </div>
-  </div>
-);
+          {/* ── RIGHT COLUMN: CIRCULAR & DYNAMIC GRAPHIC (Enlarged Layout) ── */}
+          <div className="lg:col-span-7 flex items-center justify-center relative w-full h-[480px] sm:h-[620px] lg:h-[680px]">
+            
+            {/* Multiple Background Accent Rotating Rings */}
+            <div className="absolute w-[440px] h-[440px] sm:w-[580px] sm:h-[580px] lg:w-[620px] lg:h-[620px] rounded-full border border-gray-200/50 pointer-events-none z-0"></div>
+            <div className="absolute w-[410px] h-[410px] sm:w-[540px] sm:h-[540px] lg:w-[580px] lg:h-[580px] rounded-full border border-dashed border-[#102167]/10 animate-[spin_80s_linear_infinite_reverse] pointer-events-none z-0"></div>
+            <div className="absolute w-[350px] h-[350px] sm:w-[470px] sm:h-[470px] lg:w-[510px] lg:h-[510px] rounded-full border border-transparent border-t-[#ef7041]/20 border-r-[#ef7041]/20 animate-[spin_40s_linear_infinite] pointer-events-none z-0 rotate-[45deg]"></div>
 
-const HeroSection = () => (
-  <section id="home" className="bg-[#fdf8f4] min-h-screen pt-[68px] overflow-hidden relative">
+            {/* Pulsing particles in empty spots */}
+            <div className="absolute top-[12%] right-[18%] w-4 h-4 bg-[#ef7041] rounded-full opacity-70 animate-pulse z-10"></div>
+            <div className="absolute top-[24%] left-[12%] w-3 h-3 bg-[#102167] rounded-full opacity-60 animate-bounce z-10"></div>
+            <div className="absolute bottom-[20%] right-[12%] w-3 h-3 bg-[#ef7041] rounded-full opacity-80 animate-pulse z-10"></div>
+            <div className="absolute bottom-[14%] left-[16%] w-4 h-4 bg-[#102167] rounded-full opacity-50 animate-bounce z-10"></div>
 
-    {/* Background decoration blobs */}
-    <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#ece9f8] rounded-full opacity-40 blur-3xl translate-x-20 -translate-y-10 pointer-events-none"></div>
-    <div className="absolute bottom-32 right-0 w-[220px] h-[220px] bg-[#f0edfc] rounded-full opacity-50 blur-2xl translate-x-10 pointer-events-none"></div>
+            {/* Rotating Concentric Circle Ring containing the floating badges - Enlarged for Distance */}
+            <div className="absolute w-[320px] h-[320px] sm:w-[480px] sm:h-[480px] lg:w-[540px] lg:h-[540px] rounded-full border-[3px] border-t-[#ef7041] border-b-[#ef7041] border-l-[#102167] border-r-[#102167] opacity-90 animate-[spin_55s_linear_infinite] z-0 flex items-center justify-center">
+              
+              {/* 1. Community Service - Top-Left (Orange) */}
+              <div className="absolute top-[6%] left-[6%] w-20 h-20 sm:w-24 sm:h-24 animate-[spin_55s_linear_infinite_reverse]">
+                <div className="w-full h-full rounded-full bg-[#ef7041] hover:bg-[#d65f32] text-white flex flex-col items-center justify-center p-2 text-center shadow-[0_8px_30px_rgba(239,112,65,0.3)] hover:scale-110 transition-transform duration-300 cursor-pointer group/badge">
+                  <FiUsers className="text-xl sm:text-2xl mb-1 group-hover/badge:scale-110 transition-transform duration-300" />
+                  <span className="text-[8px] sm:text-[10px] font-bold leading-tight uppercase tracking-wider">
+                    Community<br/>Service
+                  </span>
+                </div>
+              </div>
 
-    <div className="max-w-7xl mx-auto px-8">
-      <div className="grid grid-cols-2 gap-8 items-center" style={{ minHeight: 'calc(100vh - 130px)' }}>
+              {/* 2. Leadership - Top-Right (Dark Blue) */}
+              <div className="absolute top-[6%] right-[6%] w-20 h-20 sm:w-24 sm:h-24 animate-[spin_55s_linear_infinite_reverse]">
+                <div className="w-full h-full rounded-full bg-[#102167] hover:bg-[#1a2f85] text-white flex flex-col items-center justify-center p-2 text-center shadow-[0_8px_30px_rgba(16,33,103,0.25)] hover:scale-110 transition-transform duration-300 cursor-pointer group/badge">
+                  <FiAward className="text-xl sm:text-2xl mb-1 group-hover/badge:scale-110 transition-transform duration-300" />
+                  <span className="text-[8px] sm:text-[10px] font-bold leading-tight uppercase tracking-wider">
+                    Leadership
+                  </span>
+                </div>
+              </div>
 
-        {/* ── LEFT ── */}
-        <div className="space-y-6 py-12">
-          {/* Tag line */}
-          <p className="text-[11px] font-bold tracking-[0.25em] text-gray-400 uppercase">
-            Service &nbsp;|&nbsp; Unity &nbsp;|&nbsp; Development
-          </p>
+              {/* 3. Social Responsibility - Bottom-Left (Dark Blue) */}
+              <div className="absolute bottom-[6%] left-[6%] w-20 h-20 sm:w-24 sm:h-24 animate-[spin_55s_linear_infinite_reverse]">
+                <div className="w-full h-full rounded-full bg-[#102167] hover:bg-[#1a2f85] text-white flex flex-col items-center justify-center p-2 text-center shadow-[0_8px_30px_rgba(16,33,103,0.25)] hover:scale-110 transition-transform duration-300 cursor-pointer group/badge">
+                  <FiHeart className="text-xl sm:text-2xl mb-1 group-hover/badge:scale-110 transition-transform duration-300" />
+                  <span className="text-[8px] sm:text-[10px] font-bold leading-tight uppercase tracking-wider">
+                    Social<br/>Responsibility
+                  </span>
+                </div>
+              </div>
 
-          {/* Headline */}
-          <h1 className="text-[62px] font-black leading-none tracking-tight">
-            <span className="block text-[#102167]">Not Me</span>
-            <span className="block">
-              <span className="text-[#102167]">But </span>
-              <span className="text-[#ef7041]">You</span>
-            </span>
-          </h1>
+              {/* 4. Nation Building - Bottom-Right (Orange) */}
+              <div className="absolute bottom-[6%] right-[6%] w-20 h-20 sm:w-24 sm:h-24 animate-[spin_55s_linear_infinite_reverse]">
+                <div className="w-full h-full rounded-full bg-[#ef7041] hover:bg-[#d65f32] text-white flex flex-col items-center justify-center p-2 text-center shadow-[0_8px_30px_rgba(239,112,65,0.3)] hover:scale-110 transition-transform duration-300 cursor-pointer group/badge">
+                  <FiFlag className="text-xl sm:text-2xl mb-1 group-hover/badge:scale-110 transition-transform duration-300" />
+                  <span className="text-[8px] sm:text-[10px] font-bold leading-tight uppercase tracking-wider">
+                    Nation<br/>Building
+                  </span>
+                </div>
+              </div>
 
-          {/* Subtitle */}
-          <p className="text-[15px] text-gray-500 font-medium leading-relaxed max-w-[300px]">
-            Let's come together to make<br/>a meaningful difference.
-          </p>
+            </div>
 
-          {/* CTA */}
-          <Link to="/login"
-            className="inline-flex items-center gap-2 bg-[#102167] text-white font-bold px-7 py-3.5 rounded-lg text-sm hover:bg-[#1a2f85] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 group">
-            Explore More
-            <FiArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
+            {/* Center Circular Photo Container - Enlarged visually to fill graphic space */}
+            <div className="relative w-[240px] h-[240px] sm:w-[340px] sm:h-[340px] lg:w-[380px] lg:h-[380px] rounded-full overflow-hidden border-[10px] border-white shadow-[0_20px_60px_rgba(0,0,0,0.14)] z-10">
+              <img 
+                src={volunteerImg} 
+                alt="NSS Volunteers" 
+                className="w-full h-full object-cover object-center scale-[1.35] hover:scale-[1.45] transition-transform duration-700 ease-out" 
+              />
+            </div>
 
-        {/* ── RIGHT — Illustration ── */}
-        <div className="relative h-[480px]">
-          <HeroIllustration />
+          </div>
+
         </div>
       </div>
-    </div>
 
-    {/* ── Bottom Feature Bar ── */}
-    <div className="mx-8 mb-8 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="grid grid-cols-4 divide-x divide-gray-100">
-        <Feature emoji="👥" title="Community Service" sub="Serve with heart" border />
-        <Feature emoji="🏅" title="Leadership" sub="Lead by example" border />
-        <Feature emoji="❤️" title="Social Responsibility" sub="Think for others" border />
-        <Feature emoji="🏛️" title="Nation Building" sub="Work for the nation" />
+      {/* ── Bottom Floating Stats Bar - Large & Padded ── */}
+      <div className="px-8 pb-8 z-10 w-full">
+        <div className="max-w-6xl mx-auto bg-white rounded-[32px] shadow-[0_16px_48px_rgba(0,0,0,0.05)] border border-gray-100/90 p-6 sm:p-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 divide-x divide-gray-100 text-center">
+            
+            {stats.map((s, idx) => (
+              <div key={idx} className="flex flex-col items-center justify-center px-4">
+                <span className="text-4xl sm:text-5xl font-black text-[#102167] tracking-tight">
+                  <CountUp end={s.value} suffix={s.suffix} />
+                </span>
+                <span className="text-[11px] sm:text-xs font-bold text-gray-400 mt-2.5 uppercase tracking-[0.15em] leading-none">
+                  {s.label}
+                </span>
+              </div>
+            ))}
+
+          </div>
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default HeroSection;
