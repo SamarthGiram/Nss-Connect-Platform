@@ -45,7 +45,7 @@ const HeroSection = () => {
       <div className="absolute right-[-50px] top-[12%] w-[650px] h-[650px] rounded-full border border-dashed border-[#102167]/5 pointer-events-none z-0"></div>
 
       {/* Denser Dot Grid Patterns to fill space */}
-      <div className="absolute top-[20%] left-[2%] w-44 h-44 opacity-30 bg-[radial-gradient(#102167_1.8px,transparent_1.8px)] [background-size:16px_16px] hidden xl:block z-0"></div>
+      <div className="absolute top-[20%] left-[2%] w-44 h-44 opacity-[0.07] bg-[radial-gradient(#102167_1.8px,transparent_1.8px)] [background-size:16px_16px] hidden xl:block z-0"></div>
       <div className="absolute bottom-[22%] right-[2%] w-48 h-48 opacity-30 bg-[radial-gradient(#ef7041_1.8px,transparent_1.8px)] [background-size:16px_16px] hidden xl:block z-0"></div>
       <div className="absolute top-[42%] right-[45%] w-24 h-48 opacity-20 bg-[radial-gradient(#94a3b8_1.5px,transparent_1.5px)] [background-size:14px_14px] hidden lg:block z-0"></div>
 
