@@ -1,13 +1,61 @@
+import { useState, useRef } from 'react';
 import { HiOutlineStar } from 'react-icons/hi';
+import { FiPlay, FiX, FiVolume2, FiVolumeX } from 'react-icons/fi';
 
-// Gallery items - colored placeholder cards
-const galleryItems = [
-  { label: 'Tree Plantation Drive', color: 'from-green-400 to-emerald-600', emoji: '🌱' },
-  { label: 'Blood Donation Camp', color: 'from-red-400 to-rose-600', emoji: '🩸' },
-  { label: 'Swachhta Abhiyan', color: 'from-blue-400 to-cyan-600', emoji: '🧹' },
-  { label: 'Covid Awareness Drive', color: 'from-violet-400 to-purple-600', emoji: '🏥' },
-  { label: 'Rural Education Camp', color: 'from-amber-400 to-orange-500', emoji: '📚' },
-  { label: 'Flood Relief Work', color: 'from-[#102167] to-blue-700', emoji: '🤝' },
+// High-quality mixed media list (4 images, 4 stock videos)
+const mediaItems = [
+  {
+    type: 'video',
+    src: 'https://assets.mixkit.co/videos/preview/mixkit-group-of-volunteers-planting-a-tree-40916-large.mp4',
+    thumbnail: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80',
+    label: 'Tree Plantation Drive',
+    category: 'Environment',
+  },
+  {
+    type: 'image',
+    src: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=80',
+    label: 'Blood Donation Camp',
+    category: 'Healthcare',
+  },
+  {
+    type: 'video',
+    src: 'https://assets.mixkit.co/videos/preview/mixkit-volunteers-collecting-garbage-in-a-park-40909-large.mp4',
+    thumbnail: 'https://images.unsplash.com/photo-1618477388954-7852f32655ec?auto=format&fit=crop&w=600&q=80',
+    label: 'Swachhta Abhiyan',
+    category: 'Cleanliness',
+  },
+  {
+    type: 'image',
+    src: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=80',
+    label: 'Rural Education Camp',
+    category: 'Education',
+  },
+  {
+    type: 'video',
+    src: 'https://assets.mixkit.co/videos/preview/mixkit-people-hands-stacked-together-in-unity-34533-large.mp4',
+    thumbnail: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=600&q=80',
+    label: 'Community Service',
+    category: 'Unity',
+  },
+  {
+    type: 'image',
+    src: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=1200&q=80',
+    label: 'Teaching Kids Program',
+    category: 'Education',
+  },
+  {
+    type: 'video',
+    src: 'https://assets.mixkit.co/videos/preview/mixkit-children-in-a-rural-school-writing-in-notebooks-50796-large.mp4',
+    thumbnail: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=600&q=80',
+    label: 'Rural School Development',
+    category: 'Development',
+  },
+  {
+    type: 'image',
+    src: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80',
+    label: 'Environment Day Awareness',
+    category: 'Campaign',
+  }
 ];
 
 const testimonials = [
@@ -34,71 +82,213 @@ const testimonials = [
   },
 ];
 
-const GalleryAndTestimonials = () => (
-  <>
-    {/* Gallery */}
-    <section id="gallery" className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <span className="text-xs font-bold text-[#ef7041] uppercase tracking-widest">Moments</span>
-          <h2 className="text-4xl font-extrabold text-[#102167] mt-2">Our <span className="text-[#ef7041]">Gallery</span></h2>
-          <div className="w-16 h-1 bg-gradient-to-r from-[#102167] to-[#ef7041] rounded-full mx-auto mt-4"></div>
-          <p className="text-gray-500 text-sm mt-3 font-medium">Captured moments of service, community and togetherness</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {galleryItems.map((item, i) => (
-            <div key={i}
-              className={`relative bg-gradient-to-br ${item.color} rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
-              style={{ aspectRatio: i === 0 || i === 5 ? '4/3' : '1/1' }}
-            >
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-4">
-                <span className="text-4xl mb-2 group-hover:scale-110 transition-transform duration-300">{item.emoji}</span>
-                <p className="text-sm font-bold text-center text-white/90">{item.label}</p>
-              </div>
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-                <span className="opacity-0 group-hover:opacity-100 text-white text-xs font-bold bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm transition-all duration-300">
-                  View Photo
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
+const GalleryAndTestimonials = () => {
+  const [activeMedia, setActiveMedia] = useState(null);
+  const [modalMuted, setModalMuted] = useState(false);
+  const videoRefs = useRef([]);
 
-    {/* Testimonials */}
-    <section className="py-20 bg-gradient-to-b from-[#f5f7ff] to-[#eef2ff]">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <span className="text-xs font-bold text-[#ef7041] uppercase tracking-widest">Voices</span>
-          <h2 className="text-4xl font-extrabold text-[#102167] mt-2">What Volunteers <span className="text-[#ef7041]">Say</span></h2>
-          <div className="w-16 h-1 bg-gradient-to-r from-[#102167] to-[#ef7041] rounded-full mx-auto mt-4"></div>
+  const openLightbox = (item) => {
+    setActiveMedia(item);
+    setModalMuted(false); // Default to unmuted when opening lightbox
+  };
+
+  const closeLightbox = () => {
+    setActiveMedia(null);
+  };
+
+  return (
+    <>
+      {/* CSS styling for Marquee Animation */}
+      <style>{`
+        @keyframes marquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        .animate-marquee-sync {
+          display: flex;
+          width: max-content;
+          animation: marquee 45s linear infinite;
+        }
+        /* Pause scroll on hover */
+        .marquee-container:hover .animate-marquee-sync {
+          animation-play-state: paused;
+        }
+      `}</style>
+
+      {/* Gallery Section */}
+      <section id="gallery" className="py-24 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 mb-12">
+          <div className="text-center">
+            <span className="text-xs font-bold text-[#ef7041] uppercase tracking-widest">Moments</span>
+            <h2 className="text-4xl font-extrabold text-[#102167] mt-2">
+              Our <span className="text-[#ef7041]">Gallery</span>
+            </h2>
+            <div className="w-16 h-1 bg-gradient-to-r from-[#102167] to-[#ef7041] rounded-full mx-auto mt-4"></div>
+            <p className="text-gray-500 text-sm mt-3 font-medium">
+              Autoplay live snippets and photos capturing the essence of togetherness and service
+            </p>
+          </div>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((t, i) => (
-            <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              {/* Stars */}
-              <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, s) => (
-                  <HiOutlineStar key={s} size={14} className="text-amber-400 fill-amber-400" />
-                ))}
-              </div>
-              <p className="text-gray-600 text-sm leading-relaxed mb-6 italic">"{t.quote}"</p>
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full ${t.color} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
-                  {t.avatar}
+
+        {/* Infinite Marquee Slider */}
+        <div className="marquee-container relative w-full overflow-hidden py-4 bg-gray-50/50 border-y border-gray-100">
+          <div className="animate-marquee-sync flex gap-6 px-3">
+            {/* Render list twice to ensure infinite scrolling loop */}
+            {[...mediaItems, ...mediaItems].map((item, idx) => (
+              <div
+                key={idx}
+                onClick={() => openLightbox(item)}
+                className="relative h-[240px] w-[320px] sm:h-[280px] sm:w-[400px] flex-shrink-0 rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:scale-[1.03] transition-all duration-500 cursor-pointer group bg-black"
+              >
+                {item.type === 'video' ? (
+                  <>
+                    <video
+                      src={item.src}
+                      poster={item.thumbnail}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-300"
+                    />
+                    {/* Small Play Badge Indicator */}
+                    <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md text-white text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/15">
+                      <FiPlay size={10} className="fill-white" />
+                      <span>Video Snippet</span>
+                    </div>
+                  </>
+                ) : (
+                  <img
+                    src={item.src}
+                    alt={item.label}
+                    loading="lazy"
+                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-500"
+                  />
+                )}
+
+                {/* Dark Overlay gradient on hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-85 transition-opacity duration-300" />
+
+                {/* Card labels */}
+                <div className="absolute bottom-0 left-0 w-full p-5 text-white flex flex-col justify-end translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#ef7041] mb-1">
+                    {item.category}
+                  </span>
+                  <h3 className="text-base sm:text-lg font-bold leading-tight">
+                    {item.label}
+                  </h3>
                 </div>
-                <div>
-                  <p className="text-sm font-extrabold text-gray-800">{t.name}</p>
-                  <p className="text-xs text-gray-400 font-medium">{t.role}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-24 bg-gradient-to-b from-[#fdf8f4] to-[#ece9f8]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <span className="text-xs font-bold text-[#ef7041] uppercase tracking-widest">Voices</span>
+            <h2 className="text-4xl font-extrabold text-[#102167] mt-2">
+              What Volunteers <span className="text-[#ef7041]">Say</span>
+            </h2>
+            <div className="w-16 h-1 bg-gradient-to-r from-[#102167] to-[#ef7041] rounded-full mx-auto mt-4"></div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((t, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 border border-gray-100/80 relative"
+              >
+                {/* Accent Star Group */}
+                <div className="flex gap-1 mb-5">
+                  {[...Array(5)].map((_, s) => (
+                    <HiOutlineStar key={s} size={15} className="text-[#ef7041] fill-[#ef7041]" />
+                  ))}
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed mb-8 italic">
+                  "{t.quote}"
+                </p>
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-12 h-12 rounded-2xl ${t.color} flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0 shadow-md`}
+                  >
+                    {t.avatar}
+                  </div>
+                  <div>
+                    <p className="text-sm font-extrabold text-gray-800">{t.name}</p>
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-0.5">
+                      {t.role}
+                    </p>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Lightbox Modal (Preview Mode) */}
+      {activeMedia && (
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          {/* Close Area */}
+          <div className="absolute inset-0 cursor-pointer" onClick={closeLightbox} />
+
+          {/* Close Button */}
+          <button
+            onClick={closeLightbox}
+            className="absolute top-6 right-6 text-white/75 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-colors z-50 border border-white/10"
+          >
+            <FiX size={24} />
+          </button>
+
+          {/* Media Frame */}
+          <div className="relative max-w-4xl w-full max-h-[80vh] flex flex-col items-center justify-center z-10 select-none">
+            {activeMedia.type === 'video' ? (
+              <div className="relative w-full h-full flex flex-col items-center justify-center">
+                <video
+                  src={activeMedia.src}
+                  poster={activeMedia.thumbnail}
+                  autoPlay
+                  controls
+                  loop
+                  muted={modalMuted}
+                  playsInline
+                  className="rounded-2xl max-h-[70vh] max-w-full object-contain shadow-2xl"
+                />
+                {/* Audio Toggle Button */}
+                <button
+                  onClick={() => setModalMuted(!modalMuted)}
+                  className="absolute bottom-6 right-6 bg-black/70 hover:bg-black/90 text-white p-3 rounded-full border border-white/20 hover:scale-105 transition-all z-20 flex items-center justify-center"
+                >
+                  {modalMuted ? <FiVolumeX size={20} /> : <FiVolume2 size={20} />}
+                </button>
+              </div>
+            ) : (
+              <img
+                src={activeMedia.src}
+                alt={activeMedia.label}
+                className="rounded-2xl max-h-[70vh] max-w-full object-contain shadow-2xl"
+              />
+            )}
+
+            {/* Info Footer */}
+            <div className="mt-4 text-center text-white px-6 max-w-xl">
+              <span className="text-xs text-[#ef7041] font-extrabold uppercase tracking-widest">
+                {activeMedia.category}
+              </span>
+              <h3 className="text-xl font-bold mt-1">{activeMedia.label}</h3>
             </div>
-          ))}
+          </div>
         </div>
-      </div>
-    </section>
-  </>
-);
+      )}
+    </>
+  );
+};
 
 export default GalleryAndTestimonials;
