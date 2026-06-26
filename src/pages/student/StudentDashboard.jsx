@@ -10,32 +10,39 @@ import { BsShieldCheck } from 'react-icons/bs';
 
 // ─── Circular Progress ───────────────────────────────────────────
 const CircularProgress = ({ percent }) => {
-  const r = 52;
-  const circ = 2 * Math.PI * r;
+  const size   = 190;
+  const cx     = size / 2;
+  const r      = 78;
+  const stroke = 11;
+  const circ   = 2 * Math.PI * r;
   const offset = circ - (percent / 100) * circ;
   return (
     <div className="relative flex items-center justify-center">
-      <svg width="140" height="140" viewBox="0 0 140 140">
-        <circle cx="70" cy="70" r={r} stroke="#e8eeff" strokeWidth="10" fill="none" />
-        <circle
-          cx="70" cy="70" r={r}
-          stroke="url(#progressGrad)"
-          strokeWidth="10" fill="none"
-          strokeDasharray={circ}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          transform="rotate(-90 70 70)"
-        />
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <defs>
           <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#102167" />
+            <stop offset="0%"   stopColor="#102167" />
             <stop offset="100%" stopColor="#3b82f6" />
           </linearGradient>
         </defs>
+        {/* Track */}
+        <circle cx={cx} cy={cx} r={r} stroke="#e8eeff" strokeWidth={stroke} fill="none" />
+        {/* Progress */}
+        <circle
+          cx={cx} cy={cx} r={r}
+          stroke="url(#progressGrad)"
+          strokeWidth={stroke}
+          fill="none"
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${cx} ${cx})`}
+        />
       </svg>
-      <div className="absolute flex flex-col items-center">
-        <span className="text-3xl font-extrabold text-[#102167]">{percent}%</span>
-        <span className="text-xs text-gray-400 font-semibold">Overall Attendance</span>
+      {/* Inner text — absolutely centred */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+        <span className="text-[32px] font-black text-[#102167] leading-none">{percent}%</span>
+        <span className="text-[11px] text-gray-400 font-bold tracking-wide">Overall Attendance</span>
       </div>
     </div>
   );
@@ -133,7 +140,7 @@ const StudentDashboard = () => {
   return (
     <div className="space-y-5">
       {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard
           icon={HiOutlineUserGroup}
           iconBg="bg-gradient-to-br from-[#102167] to-[#3b4da8]"
@@ -169,15 +176,15 @@ const StudentDashboard = () => {
       </div>
 
       {/* ── Row 2: Events + Attendance ── */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
         {/* Upcoming Events */}
-        <div className="col-span-3 bg-white rounded-2xl p-6 shadow-sm border border-gray-50">
+        <div className="xl:col-span-3 bg-white rounded-2xl p-6 shadow-sm border border-gray-50">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-extrabold text-gray-800 flex items-center gap-2">
               <HiOutlineCalendar size={18} className="text-[#102167]" />
               Upcoming Events
             </h3>
-            <button className="text-xs font-bold text-[#102167] hover:text-[#ef7041] transition-colors duration-200">
+            <button className="text-[11px] font-bold text-[#102167] bg-[#eef2ff] px-3 py-1.5 rounded-lg hover:bg-[#102167] hover:text-white transition-all duration-200">
               View All
             </button>
           </div>
@@ -186,14 +193,14 @@ const StudentDashboard = () => {
               <EventRow key={i} {...ev} />
             ))}
           </div>
-          <button className="mt-4 flex items-center gap-1.5 text-sm font-bold text-[#102167] hover:text-[#ef7041] transition-colors duration-200 group">
+          <button className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#102167] bg-[#eef2ff] px-4 py-2 rounded-xl hover:bg-[#102167] hover:text-white transition-all duration-200 group">
             View All Events
-            <FiArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-200" />
+            <FiArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform duration-200" />
           </button>
         </div>
 
         {/* Attendance Overview */}
-        <div className="col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+        <div className="xl:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
           <h3 className="text-base font-extrabold text-gray-800 mb-1">Attendance Overview</h3>
           <p className="text-xs text-gray-400 font-medium mb-4">Current semester performance</p>
 
@@ -221,7 +228,7 @@ const StudentDashboard = () => {
       </div>
 
       {/* ── Row 3: Recent Activity + Quick Links ── */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
         {/* Recent Activity */}
         <div className="col-span-3 bg-white rounded-2xl p-6 shadow-sm border border-gray-50">
           <div className="flex items-center justify-between mb-3">
@@ -233,14 +240,14 @@ const StudentDashboard = () => {
           {recentActivity.map((act, i) => (
             <ActivityRow key={i} {...act} />
           ))}
-          <button className="mt-4 flex items-center gap-1.5 text-sm font-bold text-[#102167] hover:text-[#ef7041] transition-colors duration-200 group">
+          <button className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#ef7041] bg-orange-50 px-4 py-2 rounded-xl hover:bg-[#ef7041] hover:text-white transition-all duration-200 group">
             View All Activity
-            <FiArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-200" />
+            <FiArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform duration-200" />
           </button>
         </div>
 
         {/* Quick Links */}
-        <div className="col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-50">
+        <div className="xl:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-50">
           <h3 className="text-base font-extrabold text-gray-800 mb-4 flex items-center gap-2">
             <svg className="w-4 h-4 text-[#102167]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />

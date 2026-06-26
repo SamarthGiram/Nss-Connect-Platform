@@ -62,7 +62,7 @@ const MyAttendance = () => (
     </div>
 
     {/* Table + Chart */}
-    <div className="grid lg:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
       {/* Table */}
       <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">

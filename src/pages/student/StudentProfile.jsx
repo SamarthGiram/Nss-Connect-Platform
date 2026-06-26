@@ -42,7 +42,7 @@ const StudentProfile = () => {
         <p className="text-sm text-gray-400 font-medium mt-0.5">Manage your NSS volunteer profile</p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left — Avatar + Stats */}
         <div className="space-y-5">
           {/* Avatar Card */}
@@ -142,7 +142,7 @@ const StudentProfile = () => {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <InfoRow icon={HiOutlineUser}            label="Full Name"    value={auth?.name || 'Student'} />
                 <InfoRow icon={HiOutlineMail}            label="Email"        value="student@nss.com" />
                 <InfoRow icon={HiOutlinePhone}           label="Phone"        value={phone} />
