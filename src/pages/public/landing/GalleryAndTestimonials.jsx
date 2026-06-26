@@ -170,18 +170,8 @@ const GalleryAndTestimonials = () => {
                   />
                 )}
 
-                {/* Dark Overlay gradient on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-85 transition-opacity duration-300" />
-
-                {/* Card labels */}
-                <div className="absolute bottom-0 left-0 w-full p-5 text-white flex flex-col justify-end translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#ef7041] mb-1">
-                    {item.category}
-                  </span>
-                  <h3 className="text-base sm:text-lg font-bold leading-tight">
-                    {item.label}
-                  </h3>
-                </div>
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300" />
               </div>
             ))}
           </div>

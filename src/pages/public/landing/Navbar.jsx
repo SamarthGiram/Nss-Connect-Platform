@@ -2,12 +2,40 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import nssLogo from '../../../assets/nss.png';
 
+const navLinks = [
+  { name: 'Home', href: '#home', id: 'home' },
+  { name: 'About NSS', href: '#about-nss', id: 'about-nss' },
+  { name: 'Activities', href: '#activities', id: 'activities' },
+  { name: 'Events', href: '#events', id: 'events' },
+  { name: 'Gallery', href: '#gallery', id: 'gallery' },
+  { name: 'Contact', href: '#contact', id: 'contact' },
+];
+
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
+
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', fn);
-    return () => window.removeEventListener('scroll', fn);
+    const handleScroll = () => {
+      // Set scrolled state for background styling
+      setScrolled(window.scrollY > 10);
+
+      // Track active section based on scroll offset
+      const scrollPos = window.scrollY + 180; // offset for navbar height + buffer
+      const sections = navLinks.map(link => document.getElementById(link.id));
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        if (section && scrollPos >= section.offsetTop) {
+          setActiveSection(navLinks[i].id);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Trigger initial check
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
@@ -22,13 +50,22 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-10 lg:gap-12">
-          {['Home', 'About NSS', 'Activities', 'Events', 'Gallery', 'Contact'].map((l, i) => (
-            <a key={l} href={`#${l.toLowerCase().replace(/\s+/g, '-')}`}
-              className="relative text-[14px] sm:text-[15.5px] font-bold text-gray-600 hover:text-[#102167] transition-colors group">
-              {l}
-              {i === 0 && (
-                <span className="absolute -bottom-2 left-0 right-0 h-[3px] bg-[#ef7041] rounded-full"></span>
-              )}
+          {navLinks.map((link) => (
+            <a
+              key={link.id}
+              href={link.href}
+              className={`relative text-[14px] sm:text-[15.5px] font-bold transition-colors group py-1 ${
+                activeSection === link.id ? 'text-[#102167]' : 'text-gray-600 hover:text-[#102167]'
+              }`}
+            >
+              {link.name}
+              <span
+                className={`absolute -bottom-2 left-0 h-[3px] bg-[#ef7041] rounded-full transition-all duration-300 ${
+                  activeSection === link.id
+                    ? 'w-full opacity-100'
+                    : 'w-0 opacity-0 group-hover:w-1/2 group-hover:opacity-50'
+                }`}
+              ></span>
             </a>
           ))}
           <Link to="/login"

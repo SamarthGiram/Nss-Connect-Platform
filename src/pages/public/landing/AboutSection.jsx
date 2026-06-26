@@ -13,7 +13,7 @@ const objectives = [
 ];
 
 const AboutSection = () => (
-  <section id="about" className="py-20 bg-white">
+  <section id="about-nss" className="py-20 bg-white">
     <div className="max-w-7xl mx-auto px-8">
       <div className="text-center mb-14">
         <span className="text-xs font-bold text-[#ef7041] uppercase tracking-widest">Who We Are</span>
