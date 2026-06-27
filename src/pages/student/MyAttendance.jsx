@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { fetchStudentAttendance } from '../../services/attendanceService';
 import { HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineCalendar, HiOutlineLocationMarker } from 'react-icons/hi';
 import { BsShieldCheck } from 'react-icons/bs';
 
@@ -17,9 +20,8 @@ const total   = records.length;
 const pct     = Math.round((present / total) * 100);
 const totalPts = records.reduce((s, r) => s + r.points, 0);
 
-/* Mini circular chart */
 const MiniCircle = ({ pct, size = 100, stroke = 9, color = '#102167' }) => {
-  const r   = (size - stroke) / 2;
+  const r    = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -31,13 +33,53 @@ const MiniCircle = ({ pct, size = 100, stroke = 9, color = '#102167' }) => {
   );
 };
 
-const MyAttendance = () => (
+const MyAttendance = () => {
+  const { auth } = useAuth();
+  const [records, setRecords]   = useState([]);
+  const [loading, setLoading]   = useState(true);
+
+  useEffect(() => {
+    if (!auth?.id) return;
+    fetchStudentAttendance(auth.id)
+      .then(data => {
+        // normalize to flat shape expected by UI
+        setRecords(data.map(r => ({
+          id:     r.id,
+          event:  r.events?.title  || 'Unknown Event',
+          date:   r.events?.date   ? new Date(r.events.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—',
+          venue:  r.events?.venue  || '—',
+          status: r.status,
+          points: r.status === 'Present' ? 10 : 0,
+        })));
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [auth?.id]);
+
+  const present   = records.filter(r => r.status === 'Present').length;
+  const total     = records.length;
+  const pct       = total > 0 ? Math.round((present / total) * 100) : 0;
+  const totalPts  = records.reduce((s, r) => s + r.points, 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-[#102167] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm font-semibold text-gray-400">Loading attendance…</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
   <div className="space-y-6">
     {/* Header */}
     <div>
       <h1 className="text-2xl font-extrabold text-gray-800">My Attendance</h1>
       <p className="text-sm text-gray-400 font-medium mt-0.5">Track your NSS event participation record</p>
     </div>
+
 
     {/* Summary Cards */}
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -140,6 +182,7 @@ const MyAttendance = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default MyAttendance;

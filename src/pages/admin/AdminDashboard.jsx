@@ -5,7 +5,8 @@ import {
   HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineLocationMarker, HiOutlineClock
 } from 'react-icons/hi';
 import { BsShieldCheck } from 'react-icons/bs';
-import { FiArrowRight, FiTrendingUp, FiActivity } from 'react-icons/fi';
+import { FiArrowRight, FiTrendingUp, FiActivity, FiUserPlus, FiCalendar, FiBell, FiCheckSquare } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const users   = Object.values(mockUsers);
 const students    = users.filter(u => u.role === 'student');
@@ -24,6 +25,15 @@ const StatCard = ({ icon: Icon, iconBg, label, value, sub, subColor }) => (
   </div>
 );
 
+const QuickLink = ({ icon: Icon, label, onClick }) => (
+  <button onClick={onClick} className="flex items-center gap-2.5 px-4 py-3.5 bg-white rounded-xl border border-gray-100 hover:border-[#102167]/30 hover:bg-[#f5f7ff] transition-all duration-200 w-full shadow-sm hover:shadow-md group">
+    <div className="w-8 h-8 bg-[#eef2ff] rounded-lg flex items-center justify-center group-hover:bg-[#102167] transition-colors duration-200">
+      <Icon size={16} className="text-[#102167] group-hover:text-white transition-colors duration-200" />
+    </div>
+    <span className="text-sm font-bold text-gray-700 group-hover:text-[#102167] transition-colors duration-200">{label}</span>
+  </button>
+);
+
 const recentActivity = [
   { icon: HiOutlineCheckCircle, iconColor: 'text-emerald-600', iconBg: 'bg-emerald-50', text: 'Tree Plantation Drive attendance marked', time: '10 min ago' },
   { icon: HiOutlineUserGroup,   iconColor: 'text-blue-600',    iconBg: 'bg-blue-50',    text: 'New student Priya Sharma registered',   time: '1 hr ago'  },
@@ -39,6 +49,7 @@ const pendingItems = [
 
 const AdminDashboard = () => {
   const { auth } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-5">
@@ -159,6 +170,22 @@ const AdminDashboard = () => {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+      
+      {/* ── Row 2.5: Quick Links ── */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h3 className="text-base font-extrabold text-gray-800 mb-4 flex items-center gap-2">
+          <svg className="w-4 h-4 text-[#102167]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          Quick Actions
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <QuickLink icon={FiCalendar} label="Manage Events" onClick={() => navigate('/admin/events')} />
+          <QuickLink icon={FiCheckSquare} label="Take Attendance" onClick={() => navigate('/admin/attendance')} />
+          <QuickLink icon={FiBell} label="Announcements" onClick={() => navigate('/admin/announcements')} />
+          <QuickLink icon={FiUserPlus} label="Add Professor" onClick={() => navigate('/admin/users')} />
         </div>
       </div>
 

@@ -1,20 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import nssLogo from '../assets/nss.png';
 import {
   HiOutlineViewGrid, HiOutlineCalendar, HiOutlineClipboardCheck,
-  HiOutlineMenuAlt2, HiOutlineX
+  HiOutlineMenuAlt2, HiOutlineX, HiOutlineSpeakerphone, HiOutlineUserGroup
 } from 'react-icons/hi';
 import { FiBell, FiChevronDown, FiBookOpen } from 'react-icons/fi';
 
 const professorLinks = [
-  { name: 'Dashboard',       path: '/professor/dashboard',  icon: HiOutlineViewGrid       },
-  { name: 'My Events',       path: '/professor/events',     icon: HiOutlineCalendar       },
-  { name: 'Take Attendance', path: '/professor/attendance', icon: HiOutlineClipboardCheck },
+  { name: 'Dashboard',          path: '/professor/dashboard',      icon: HiOutlineViewGrid,       badge: null  },
+  { name: 'My Events',          path: '/professor/events',         icon: HiOutlineCalendar,       badge: null  },
+  { name: 'Take Attendance',    path: '/professor/attendance',     icon: HiOutlineClipboardCheck, badge: null  },
+  { name: 'Announcements',      path: '/professor/announcements',  icon: HiOutlineSpeakerphone,   badge: null  },
+  { name: 'Manage Students',    path: '/professor/students',       icon: HiOutlineUserGroup,      badge: null  },
+  { name: 'Student Approvals',  path: '/professor/approvals',      icon: HiOutlineClipboardCheck, badge: 'pending' },
 ];
 
-const SidebarContent = ({ auth, onClose }) => (
+const SidebarContent = ({ auth, onClose, pendingCount }) => (
   <div className="flex flex-col h-full">
     <div className="flex items-center justify-between gap-3 px-5 pt-6 pb-4 border-b border-gray-100">
       <div className="flex items-center gap-3">
@@ -41,9 +45,22 @@ const SidebarContent = ({ auth, onClose }) => (
       </div>
     </div>
 
+    {/* Pending requests alert */}
+    {pendingCount > 0 && (
+      <div className="mx-3 mt-2 flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+        <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+          <span className="text-white text-[10px] font-black">{pendingCount}</span>
+        </div>
+        <p className="text-[10px] font-bold text-amber-700">
+          {pendingCount} student{pendingCount > 1 ? 's' : ''} awaiting approval
+        </p>
+      </div>
+    )}
+
     <nav className="flex-1 px-3 pt-3 space-y-1">
       {professorLinks.map(link => {
         const Icon = link.icon;
+        const showBadge = link.badge === 'pending' && pendingCount > 0;
         return (
           <NavLink key={link.name} to={link.path} onClick={onClose}
             className={({ isActive }) =>
@@ -54,7 +71,12 @@ const SidebarContent = ({ auth, onClose }) => (
             {({ isActive }) => (
               <>
                 <Icon size={18} className={isActive ? 'text-[#102167]' : 'text-gray-400'} />
-                {link.name}
+                <span className="flex-1">{link.name}</span>
+                {showBadge && (
+                  <span className="min-w-[20px] h-5 bg-amber-500 text-white text-[10px] font-extrabold rounded-full flex items-center justify-center px-1.5">
+                    {pendingCount}
+                  </span>
+                )}
               </>
             )}
           </NavLink>
@@ -95,7 +117,24 @@ const ProfessorLayout = () => {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  useEffect(() => {
+    const fetchPending = async () => {
+      try {
+        const { count } = await supabase
+          .from('profiles')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'pending')
+          .eq('role', 'student');
+        setPendingCount(count || 0);
+      } catch {/* silent */ }
+    };
+    fetchPending();
+    const iv = setInterval(fetchPending, 60000);
+    return () => clearInterval(iv);
+  }, []);
 
   return (
     <div className="flex h-screen bg-[#f0f4ff] font-sans overflow-hidden">
@@ -110,7 +149,7 @@ const ProfessorLayout = () => {
         transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-        <SidebarContent auth={auth} onClose={() => setSidebarOpen(false)} />
+        <SidebarContent auth={auth} onClose={() => setSidebarOpen(false)} pendingCount={pendingCount} />
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -130,7 +169,11 @@ const ProfessorLayout = () => {
           <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
             <button className="relative p-2 md:p-2.5 rounded-xl bg-white border border-gray-200 hover:border-amber-300 hover:bg-amber-50 transition-all duration-200 shadow-sm">
               <FiBell size={18} className="text-gray-400" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full border border-white"></span>
+              {pendingCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-amber-500 rounded-full border-2 border-white text-white text-[9px] font-black flex items-center justify-center px-1">
+                  {pendingCount}
+                </span>
+              )}
             </button>
             <button onClick={handleLogout}
               className="flex items-center gap-2 px-2 md:px-4 py-2 rounded-xl bg-white border border-gray-200 hover:border-amber-300 hover:bg-amber-50 transition-all duration-200 shadow-sm">

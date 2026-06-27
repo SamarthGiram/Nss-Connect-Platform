@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import {
   FiUser, FiHash, FiMail, FiPhone, FiBook,
   FiLock, FiEye, FiEyeOff, FiArrowRight,
@@ -38,11 +39,13 @@ const GROUPS = ['Group A', 'Group B', 'Group C', 'Group D'];
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [showPass, setShowPass]     = useState(false);
   const [showConf, setShowConf]     = useState(false);
   const [submitted, setSubmitted]   = useState(false);
   const [loading, setLoading]       = useState(false);
   const [errors, setErrors]         = useState({});
+  const [apiError, setApiError]     = useState('');
 
   const [form, setForm] = useState({
     fullName: '', rollNumber: '', email: '', phone: '',
@@ -69,9 +72,25 @@ const RegisterPage = () => {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 900));
-    setLoading(false);
-    setSubmitted(true);
+    setApiError('');
+    try {
+      await register({
+        email:       form.email,
+        password:    form.password,
+        name:        form.fullName,
+        role:        'student',
+        phone:       form.phone,
+        rollNumber:  form.rollNumber,
+        department:  form.department,
+        year:        form.year,
+        group:       form.group,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setApiError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   /* ─── Success Screen ─── */
@@ -79,16 +98,18 @@ const RegisterPage = () => {
     return (
       <div className="min-h-screen bg-[#f0f4ff] flex items-center justify-center px-4 font-sans">
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-10 max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-5 ring-8 ring-emerald-50">
-            <FiCheckCircle size={38} className="text-emerald-500" />
+          <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-5 ring-8 ring-amber-50">
+            <FiCheckCircle size={38} className="text-amber-500" />
           </div>
-          <h2 className="text-2xl font-black text-gray-800 mb-2">Registration Submitted!</h2>
-          <p className="text-gray-400 font-medium text-sm leading-relaxed mb-6">
-            Your registration request has been sent to the NSS Coordinator.<br/>
-            You will receive login credentials via email once approved.
+          <h2 className="text-2xl font-black text-gray-800 mb-2">Application Submitted!</h2>
+          <p className="text-gray-400 font-medium text-sm leading-relaxed mb-2">
+            Your registration request has been sent to the NSS Coordinator.
           </p>
-          <div className="bg-[#eef2ff] rounded-2xl p-4 mb-6 text-left">
-            <p className="text-[11px] text-gray-400 font-bold uppercase tracking-wider mb-2">Submitted Details</p>
+          <p className="text-gray-500 font-semibold text-sm leading-relaxed mb-6">
+            ⏳ <strong className="text-[#102167]">Please wait for admin approval.</strong> You will be able to log in once your account is reviewed and activated.
+          </p>
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 text-left">
+            <p className="text-[11px] text-amber-700 font-bold uppercase tracking-wider mb-2">📋 Submitted Details</p>
             <p className="text-sm font-bold text-gray-700">{form.fullName}</p>
             <p className="text-xs text-gray-400 font-medium">{form.email} · {form.rollNumber}</p>
             <p className="text-xs text-gray-400 font-medium">{form.department} · {form.year} · {form.group}</p>
@@ -104,6 +125,7 @@ const RegisterPage = () => {
       </div>
     );
   }
+
 
   /* ─── Main Register Page ─── */
   return (
@@ -212,6 +234,16 @@ const RegisterPage = () => {
               Register as a student volunteer — your request will be reviewed by the NSS Coordinator.
             </p>
           </div>
+
+          {/* API Error Banner */}
+          {apiError && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3">
+              <div className="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                <FiShield size={14} className="text-red-500" />
+              </div>
+              <p className="text-red-600 text-sm font-semibold">{apiError}</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
 

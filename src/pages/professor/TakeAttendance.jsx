@@ -1,43 +1,42 @@
-import { useState } from 'react';
-import { mockEvents, mockUsers } from '../../data/mockData';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { fetchEvents } from '../../services/eventsService';
+import { fetchStudentsForEvent, submitAttendance } from '../../services/attendanceService';
 import {
   HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineUserGroup,
   HiOutlineCalendar, HiOutlineLocationMarker, HiOutlineSearch
 } from 'react-icons/hi';
 import { FiSave, FiCheck, FiX } from 'react-icons/fi';
 
-const students = Object.values(mockUsers).filter(u => u.role === 'student');
 
-// Add more mock students
-const allStudents = [
-  ...students,
-  { id: 'u2', name: 'Priya Sharma',    role: 'student', group: 'Group B' },
-  { id: 'u3', name: 'Rahul Patil',     role: 'student', group: 'Group A' },
-  { id: 'u4', name: 'Ananya Kulkarni', role: 'student', group: 'Group C' },
-  { id: 'u5', name: 'Vijay Deshmukh',  role: 'student', group: 'Group B' },
-  { id: 'u6', name: 'Sneha Joshi',     role: 'student', group: 'Group A' },
-  { id: 'u7', name: 'Nikhil More',     role: 'student', group: 'Group C' },
-];
-
-// de-dup by id
-const uniqueStudents = allStudents.filter((s, i, arr) => arr.findIndex(x => x.id === s.id) === i);
-
-const allEvents = [
-  ...mockEvents,
-  { id: 'e3', title: 'Tree Plantation Drive', date: '2025-06-28T09:00:00', venue: 'Green Park, Pune' },
-  { id: 'e4', title: 'Swachhta Abhiyan',      date: '2025-07-12T08:00:00', venue: 'Municipal Area'   },
-];
 
 const TakeAttendance = () => {
+  const { auth } = useAuth();
+  const [events, setEvents]               = useState([]);
+  const [students, setStudents]           = useState([]);
   const [selectedEvent, setSelectedEvent] = useState('');
   const [search, setSearch]               = useState('');
-  const [attendance, setAttendance]       = useState({});   // { studentId: 'Present'|'Absent' }
+  const [attendance, setAttendance]       = useState({});
   const [submitted, setSubmitted]         = useState(false);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [submitting, setSubmitting]       = useState(false);
 
-  const event = allEvents.find(e => e.id === selectedEvent);
+  /* Load events */
+  useEffect(() => {
+    fetchEvents()
+      .then(setEvents)
+      .catch(console.error)
+      .finally(() => setLoadingEvents(false));
 
-  const filteredStudents = uniqueStudents.filter(s =>
-    s.name.toLowerCase().includes(search.toLowerCase()) ||
+    fetchStudentsForEvent()
+      .then(setStudents)
+      .catch(console.error);
+  }, []);
+
+  const event = events.find(e => e.id === selectedEvent);
+
+  const filteredStudents = students.filter(s =>
+    (s.name || '').toLowerCase().includes(search.toLowerCase()) ||
     (s.group || '').toLowerCase().includes(search.toLowerCase())
   );
 
@@ -54,11 +53,25 @@ const TakeAttendance = () => {
 
   const presentCount = Object.values(attendance).filter(v => v === 'Present').length;
   const absentCount  = Object.values(attendance).filter(v => v === 'Absent').length;
-  const unmarked     = uniqueStudents.length - presentCount - absentCount;
+  const unmarked     = students.length - presentCount - absentCount;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedEvent) return;
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      const records = students.map(s => ({
+        event_id:     selectedEvent,
+        student_id:   s.id,
+        professor_id: auth?.id || null,
+        status:       attendance[s.id] || 'Absent',
+      }));
+      await submitAttendance(records);
+      setSubmitted(true);
+    } catch (err) {
+      alert('Submission failed: ' + err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -75,7 +88,7 @@ const TakeAttendance = () => {
         <select value={selectedEvent} onChange={e => { setSelectedEvent(e.target.value); setAttendance({}); setSubmitted(false); }}
           className="w-full px-4 py-3.5 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold text-gray-700 focus:border-[#102167] focus:ring-4 focus:ring-[#102167]/10 outline-none transition-all">
           <option value="">— Choose an event —</option>
-          {allEvents.map(ev => (
+          {events.map(ev => (
             <option key={ev.id} value={ev.id}>{ev.title} — {new Date(ev.date).toLocaleDateString()}</option>
           ))}
         </select>
@@ -92,7 +105,7 @@ const TakeAttendance = () => {
             </div>
             <div className="flex items-center gap-2 text-xs text-gray-500 font-medium bg-gray-50 px-3 py-2 rounded-lg">
               <HiOutlineUserGroup size={13} className="text-violet-500"/>
-              {uniqueStudents.length} students
+              {students.length} students
             </div>
           </div>
         )}
@@ -104,7 +117,7 @@ const TakeAttendance = () => {
           {/* Summary + Controls */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
             {[
-              { label: 'Total Students', value: uniqueStudents.length, color: 'text-[#102167]',  bg: 'bg-[#eef2ff]'  },
+              { label: 'Total Students', value: students.length, color: 'text-[#102167]',  bg: 'bg-[#eef2ff]'  },
               { label: 'Present',        value: presentCount,          color: 'text-emerald-600', bg: 'bg-emerald-50' },
               { label: 'Absent',         value: absentCount,           color: 'text-red-500',     bg: 'bg-red-50'     },
               { label: 'Unmarked',       value: unmarked,              color: 'text-amber-600',   bg: 'bg-amber-50'   },
@@ -241,7 +254,7 @@ const TakeAttendance = () => {
             <HiOutlineCalendar size={28} className="text-[#102167]"/>
           </div>
           <p className="text-gray-600 font-bold text-base">Select an event above to begin marking attendance</p>
-          <p className="text-gray-400 text-sm font-medium mt-1">All {uniqueStudents.length} registered students will appear here</p>
+          <p className="text-gray-400 text-sm font-medium mt-1">All {students.length} registered students will appear here</p>
         </div>
       )}
     </div>

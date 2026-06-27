@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { fetchStudentAttendanceSummary, fetchStudentAttendance } from '../../services/attendanceService';
 import { HiOutlineUser, HiOutlineMail, HiOutlinePhone, HiOutlineAcademicCap, HiOutlineIdentification, HiOutlineCheckCircle } from 'react-icons/hi';
 import { BsShieldCheck } from 'react-icons/bs';
 import { FiEdit2, FiSave, FiX } from 'react-icons/fi';
@@ -30,6 +31,32 @@ const StudentProfile = () => {
   const [bio, setBio]     = useState('Passionate NSS volunteer committed to community service and nation building. Member since 2023.');
   const [tempPhone, setTempPhone] = useState(phone);
   const [tempBio, setTempBio]     = useState(bio);
+  
+  const [attendance, setAttendance] = useState({ present: 0, pct: 0 });
+  const [activity, setActivity] = useState([]);
+
+  useEffect(() => {
+    if (auth?.id) {
+      fetchStudentAttendanceSummary(auth.id)
+        .then(setAttendance)
+        .catch(console.error);
+
+      fetchStudentAttendance(auth.id)
+        .then(data => {
+          const formatted = data.slice(0, 4).map(a => ({
+            icon: a.status === 'Present' ? '✅' : '❌',
+            text: `Marked ${a.status.toLowerCase()} for ${a.events?.title || 'an event'}`,
+            time: new Date(a.created_at).toLocaleDateString(),
+            color: a.status === 'Present' ? 'bg-emerald-50' : 'bg-red-50'
+          }));
+          if (formatted.length === 0) {
+            formatted.push({ icon: '👋', text: 'Welcome to NSS! No recent activity.', time: 'Recently', color: 'bg-[#eef2ff]' });
+          }
+          setActivity(formatted);
+        })
+        .catch(console.error);
+    }
+  }, [auth]);
 
   const handleSave = () => { setPhone(tempPhone); setBio(tempBio); setEditing(false); };
   const handleCancel = () => { setTempPhone(phone); setTempBio(bio); setEditing(false); };
@@ -69,9 +96,9 @@ const StudentProfile = () => {
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-4">
             <h3 className="font-extrabold text-gray-800 text-sm">My Stats</h3>
             {[
-              { label: 'Events Attended', value: '8', color: 'text-[#102167]', bar: 67, barColor: 'bg-[#102167]' },
-              { label: 'Attendance Rate', value: '92%', color: 'text-emerald-600', bar: 92, barColor: 'bg-emerald-500' },
-              { label: 'NSS Points',      value: '360', color: 'text-violet-600', bar: 72, barColor: 'bg-violet-500' },
+              { label: 'Events Attended', value: attendance.present, color: 'text-[#102167]', bar: attendance.pct || 0, barColor: 'bg-[#102167]' },
+              { label: 'Attendance Rate', value: `${attendance.pct || 0}%`, color: 'text-emerald-600', bar: attendance.pct || 0, barColor: 'bg-emerald-500' },
+              { label: 'NSS Points',      value: attendance.present * 10, color: 'text-violet-600', bar: Math.min((attendance.present * 10) / 500 * 100, 100), barColor: 'bg-violet-500' },
             ].map(s => (
               <div key={s.label}>
                 <div className="flex justify-between mb-1.5">
@@ -144,11 +171,11 @@ const StudentProfile = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <InfoRow icon={HiOutlineUser}            label="Full Name"    value={auth?.name || 'Student'} />
-                <InfoRow icon={HiOutlineMail}            label="Email"        value="student@nss.com" />
+                <InfoRow icon={HiOutlineMail}            label="Email"        value={auth?.email || 'student@nss.com'} />
                 <InfoRow icon={HiOutlinePhone}           label="Phone"        value={phone} />
                 <InfoRow icon={HiOutlineAcademicCap}     label="Group"        value={auth?.group || 'Group A'} />
                 <InfoRow icon={HiOutlineIdentification}  label="Role"         value="NSS Volunteer" />
-                <InfoRow icon={BsShieldCheck}            label="Member Since" value="June 2023" />
+                <InfoRow icon={BsShieldCheck}            label="Member Since" value={auth?.created_at ? new Date(auth.created_at).getFullYear() : '2023'} />
               </div>
             )}
           </div>
@@ -157,12 +184,7 @@ const StudentProfile = () => {
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <h3 className="font-extrabold text-gray-800 mb-5">Recent Activity</h3>
             <div className="space-y-4">
-              {[
-                { icon: '✅', text: 'Marked present for Tree Plantation Drive', time: '2 days ago',   color: 'bg-emerald-50' },
-                { icon: '⭐', text: 'Earned 50 NSS Points',                    time: '2 days ago',   color: 'bg-amber-50'   },
-                { icon: '📝', text: 'Registered for Blood Donation Camp',       time: '1 week ago',   color: 'bg-blue-50'    },
-                { icon: '🏅', text: 'Received "Tree Planter" badge',            time: '2 weeks ago',  color: 'bg-violet-50'  },
-              ].map((a, i) => (
+              {activity.map((a, i) => (
                 <div key={i} className="flex items-start gap-4">
                   <div className={`w-9 h-9 ${a.color} rounded-xl flex items-center justify-center text-sm flex-shrink-0`}>{a.icon}</div>
                   <div className="flex-1">

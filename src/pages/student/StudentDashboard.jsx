@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { mockEvents } from '../../data/mockData';
+import { fetchEvents } from '../../services/eventsService';
+import { fetchStudentAttendanceSummary, fetchStudentAttendance } from '../../services/attendanceService';
 import {
   HiOutlineUserGroup, HiOutlineCalendar, HiOutlineCheckCircle,
   HiOutlineStar, HiOutlineExternalLink, HiOutlineDownload,
@@ -106,36 +108,63 @@ const QuickLink = ({ icon: Icon, label }) => (
 // ─── Main Dashboard ───────────────────────────────────────────────
 const StudentDashboard = () => {
   const { auth } = useAuth();
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [totalEvents, setTotalEvents] = useState(0);
+  const [attendance, setAttendance] = useState({ total: 0, present: 0, absent: 0, pct: 0 });
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const upcomingEvents = [
-    { day: '28', month: 'JUN', title: 'Tree Plantation Drive', venue: 'Green Park, Pune', time: '09:00 AM' },
-    { day: '05', month: 'JUL', title: 'Blood Donation Camp', venue: 'Civil Hospital, Pune', time: '10:00 AM' },
-    { day: '12', month: 'JUL', title: 'Swachhta Abhiyan', venue: 'Pune Municipal Area', time: '08:00 AM' },
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        // Load Events
+        const allEvents = await fetchEvents();
+        setTotalEvents(allEvents.length);
+        
+        // Filter upcoming
+        const now = new Date();
+        const upcoming = allEvents
+          .filter(e => new Date(e.date) > now || e.status === 'Upcoming')
+          .slice(0, 3)
+          .map(e => {
+            const d = new Date(e.date);
+            return {
+              day: d.getDate().toString().padStart(2, '0'),
+              month: d.toLocaleString('default', { month: 'short' }).toUpperCase(),
+              title: e.title,
+              venue: e.venue,
+              time: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+          });
+        setUpcomingEvents(upcoming);
 
-  const recentActivity = [
-    {
-      icon: HiOutlineCheckCircle,
-      iconColor: 'text-green-600',
-      iconBg: 'bg-green-50',
-      text: 'Marked present for Tree Plantation Drive',
-      time: '2 days ago',
-    },
-    {
-      icon: HiOutlineStar,
-      iconColor: 'text-amber-500',
-      iconBg: 'bg-amber-50',
-      text: 'Earned 50 NSS Points',
-      time: '2 days ago',
-    },
-    {
-      icon: HiOutlineUserGroup,
-      iconColor: 'text-blue-600',
-      iconBg: 'bg-blue-50',
-      text: 'Registered for Blood Donation Camp',
-      time: '1 week ago',
-    },
-  ];
+        if (auth?.id) {
+          // Load Attendance Summary
+          const attSummary = await fetchStudentAttendanceSummary(auth.id);
+          setAttendance(attSummary);
+
+          // Load Recent Attendance (Activity)
+          const attHistory = await fetchStudentAttendance(auth.id);
+          const recentAtt = attHistory.slice(0, 3).map(a => ({
+            icon: a.status === 'Present' ? HiOutlineCheckCircle : HiOutlineXCircle,
+            iconColor: a.status === 'Present' ? 'text-green-600' : 'text-red-600',
+            iconBg: a.status === 'Present' ? 'bg-green-50' : 'bg-red-50',
+            text: `Marked ${a.status.toLowerCase()} for ${a.events?.title || 'an event'}`,
+            time: new Date(a.created_at).toLocaleDateString(),
+          }));
+          setRecentActivity(recentAtt.length > 0 ? recentAtt : [
+            { icon: HiOutlineUserGroup, iconColor: 'text-blue-600', iconBg: 'bg-blue-50', text: 'Welcome to NSS Connect Platform!', time: 'Recently' }
+          ]);
+        }
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [auth]);
 
   return (
     <div className="space-y-5">
@@ -145,7 +174,7 @@ const StudentDashboard = () => {
           icon={HiOutlineUserGroup}
           iconBg="bg-gradient-to-br from-[#102167] to-[#3b4da8]"
           label="Total Events"
-          value="12"
+          value={totalEvents}
           sub="This Semester"
           subColor="text-gray-400"
         />
@@ -153,7 +182,7 @@ const StudentDashboard = () => {
           icon={HiOutlineCalendar}
           iconBg="bg-gradient-to-br from-[#ef7041] to-[#f48b62]"
           label="Events Attended"
-          value="8"
+          value={attendance.present}
           sub="Keep Going!"
           subColor="text-[#ef7041]"
         />
@@ -161,15 +190,15 @@ const StudentDashboard = () => {
           icon={HiOutlineCheckCircle}
           iconBg="bg-gradient-to-br from-emerald-400 to-green-500"
           label="Attendance"
-          value="92%"
-          sub="Excellent!"
+          value={`${attendance.pct}%`}
+          sub={attendance.pct >= 75 ? "Excellent!" : "Needs Improvement"}
           subColor="text-emerald-500"
         />
         <StatCard
           icon={BsShieldCheck}
           iconBg="bg-gradient-to-br from-violet-500 to-purple-600"
           label="NSS Points"
-          value="360"
+          value={attendance.present * 10}
           sub="Great Work!"
           subColor="text-violet-500"
         />
@@ -189,9 +218,13 @@ const StudentDashboard = () => {
             </button>
           </div>
           <div>
-            {upcomingEvents.map((ev, i) => (
-              <EventRow key={i} {...ev} />
-            ))}
+            {upcomingEvents.length > 0 ? (
+              upcomingEvents.map((ev, i) => (
+                <EventRow key={i} {...ev} />
+              ))
+            ) : (
+              <p className="text-sm text-gray-500 py-4">No upcoming events scheduled.</p>
+            )}
           </div>
           <button className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#102167] bg-[#eef2ff] px-4 py-2 rounded-xl hover:bg-[#102167] hover:text-white transition-all duration-200 group">
             View All Events
@@ -206,18 +239,24 @@ const StudentDashboard = () => {
 
           {/* Circle — centred */}
           <div className="flex-1 flex items-center justify-center py-2">
-            <CircularProgress percent={92} />
+            <CircularProgress percent={attendance.pct} />
           </div>
 
           {/* Status pill */}
-          <div className="mt-4 bg-emerald-50 rounded-xl px-4 py-3 flex items-center gap-2">
-            <HiOutlineCheckCircle size={16} className="text-emerald-500 flex-shrink-0" />
-            <p className="text-xs text-emerald-700 font-bold">Excellent! You are doing great.</p>
+          <div className={`mt-4 rounded-xl px-4 py-3 flex items-center gap-2 ${attendance.pct >= 75 ? 'bg-emerald-50' : 'bg-amber-50'}`}>
+            <HiOutlineCheckCircle size={16} className={`${attendance.pct >= 75 ? 'text-emerald-500' : 'text-amber-500'} flex-shrink-0`} />
+            <p className={`text-xs font-bold ${attendance.pct >= 75 ? 'text-emerald-700' : 'text-amber-700'}`}>
+              {attendance.pct >= 75 ? 'Excellent! You are doing great.' : 'Warning: Attendance is low.'}
+            </p>
           </div>
 
           {/* Mini legend */}
           <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-            {[['Present','8','text-[#102167]'],['Absent','2','text-red-400'],['Rate','92%','text-emerald-600']].map(([l,v,c])=>(
+            {[
+              ['Present', attendance.present, 'text-[#102167]'],
+              ['Absent', attendance.absent, 'text-red-400'],
+              ['Rate', `${attendance.pct}%`, 'text-emerald-600']
+            ].map(([l,v,c])=>(
               <div key={l} className="bg-gray-50 rounded-xl py-2">
                 <p className={`text-sm font-extrabold ${c}`}>{v}</p>
                 <p className="text-[10px] text-gray-400 font-semibold mt-0.5">{l}</p>

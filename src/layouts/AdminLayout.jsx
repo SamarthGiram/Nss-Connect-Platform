@@ -1,21 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import nssLogo from '../assets/nss.png';
 import {
   HiOutlineViewGrid, HiOutlineCalendar, HiOutlineUserGroup,
-  HiOutlineClipboardCheck, HiOutlineMenuAlt2, HiOutlineX
+  HiOutlineClipboardCheck, HiOutlineMenuAlt2, HiOutlineX,
+  HiOutlineSpeakerphone
 } from 'react-icons/hi';
 import { FiBell, FiChevronDown, FiShield } from 'react-icons/fi';
 
 const adminLinks = [
-  { name: 'Dashboard',         path: '/admin/dashboard',  icon: HiOutlineViewGrid       },
-  { name: 'Manage Events',     path: '/admin/events',     icon: HiOutlineCalendar       },
-  { name: 'Manage Users',      path: '/admin/users',      icon: HiOutlineUserGroup      },
-  { name: 'Pending Approvals', path: '/admin/approvals',  icon: HiOutlineClipboardCheck },
+  { name: 'Dashboard',            path: '/admin/dashboard',      icon: HiOutlineViewGrid,       badge: null },
+  { name: 'Manage Events',        path: '/admin/events',         icon: HiOutlineCalendar,       badge: null },
+  { name: 'Take Attendance',      path: '/admin/attendance',     icon: HiOutlineClipboardCheck, badge: null },
+  { name: 'Announcements',        path: '/admin/announcements',  icon: HiOutlineSpeakerphone,   badge: null },
+  { name: 'Manage Users',         path: '/admin/users',          icon: HiOutlineUserGroup,       badge: null },
+  { name: 'Student Approvals',    path: '/admin/approvals',      icon: HiOutlineClipboardCheck, badge: 'pending' },
 ];
 
-const SidebarContent = ({ onClose }) => (
+const SidebarContent = ({ onClose, pendingCount }) => (
   <div className="flex flex-col h-full">
     <div className="flex items-center justify-between gap-3 px-5 pt-6 pb-4 border-b border-gray-100">
       <div className="flex items-center gap-3">
@@ -41,9 +45,22 @@ const SidebarContent = ({ onClose }) => (
       </div>
     </div>
 
+    {/* Pending requests banner */}
+    {pendingCount > 0 && (
+      <div className="mx-3 mt-2 flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+        <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+          <span className="text-white text-[10px] font-black">{pendingCount}</span>
+        </div>
+        <p className="text-[10px] font-bold text-amber-700">
+          {pendingCount} student{pendingCount > 1 ? 's' : ''} waiting approval
+        </p>
+      </div>
+    )}
+
     <nav className="flex-1 px-3 pt-3 space-y-1">
       {adminLinks.map(link => {
         const Icon = link.icon;
+        const showBadge = link.badge === 'pending' && pendingCount > 0;
         return (
           <NavLink key={link.name} to={link.path} onClick={onClose}
             className={({ isActive }) =>
@@ -54,7 +71,12 @@ const SidebarContent = ({ onClose }) => (
             {({ isActive }) => (
               <>
                 <Icon size={18} className={isActive ? 'text-[#102167]' : 'text-gray-400'} />
-                {link.name}
+                <span className="flex-1">{link.name}</span>
+                {showBadge && (
+                  <span className="min-w-[20px] h-5 bg-amber-500 text-white text-[10px] font-extrabold rounded-full flex items-center justify-center px-1.5">
+                    {pendingCount}
+                  </span>
+                )}
               </>
             )}
           </NavLink>
@@ -94,7 +116,25 @@ const AdminLayout = () => {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  // Fetch pending count on mount and poll every 60 seconds
+  useEffect(() => {
+    const fetchPending = async () => {
+      try {
+        const { count } = await supabase
+          .from('profiles')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'pending')
+          .eq('role', 'student');
+        setPendingCount(count || 0);
+      } catch {/* silent */ }
+    };
+    fetchPending();
+    const iv = setInterval(fetchPending, 60000);
+    return () => clearInterval(iv);
+  }, []);
 
   return (
     <div className="flex h-screen bg-[#f0f4ff] font-sans overflow-hidden">
@@ -109,7 +149,7 @@ const AdminLayout = () => {
         transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-        <SidebarContent onClose={() => setSidebarOpen(false)} />
+        <SidebarContent onClose={() => setSidebarOpen(false)} pendingCount={pendingCount} />
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -127,9 +167,14 @@ const AdminLayout = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+            {/* Bell with pending badge */}
             <button className="relative p-2 md:p-2.5 rounded-xl bg-white border border-gray-200 hover:border-[#ef7041]/40 hover:bg-orange-50 transition-all duration-200 shadow-sm">
               <FiBell size={18} className="text-gray-400" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#ef7041] rounded-full border-2 border-white"></span>
+              {pendingCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-amber-500 rounded-full border-2 border-white text-white text-[9px] font-black flex items-center justify-center px-1">
+                  {pendingCount}
+                </span>
+              )}
             </button>
             <button onClick={handleLogout}
               className="flex items-center gap-2 px-2 md:px-4 py-2 rounded-xl bg-white border border-gray-200 hover:border-[#ef7041]/40 hover:bg-orange-50 transition-all duration-200 shadow-sm">

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { mockUsers } from '../../data/mockData';
 import {
   FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight,
   FiFlag, FiHeart, FiUser, FiShield, FiHome
@@ -26,7 +25,7 @@ const CREDENTIALS = [
 const LoginPage = () => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [animating, setAnimating] = useState(false);
-  const { login } = useAuth();
+  const { auth, login } = useAuth();
   const navigate   = useNavigate();
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
@@ -50,24 +49,32 @@ const LoginPage = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    await new Promise(r => setTimeout(r, 600)); // smooth delay
-
-    let user = null;
-    if      (email === 'admin@nss.com'   || email === 'Admin')     user = mockUsers['a1'];
-    else if (email === 'prof@nss.com'    || email === 'Professor')  user = mockUsers['p1'];
-    else if (email === 'student@nss.com' || email === 'Student')    user = mockUsers['u1'];
-
-    if (user && password === '123') {
-      login({ ...user, token: `mock-jwt-token-for-${user.role}` });
-      if (user.role === 'admin')     navigate('/admin/dashboard');
-      if (user.role === 'professor') navigate('/professor/dashboard');
-      if (user.role === 'student')   navigate('/student/dashboard');
-    } else {
-      setError('Invalid email or password. Please try again.');
+    try {
+      const { data } = await login(email, password);
+      // Navigate based on role from profile (fetched inside login)
+      // Re-read auth after login completes
+      // auth is set inside context, read it after a tick
+      setTimeout(() => {
+        const stored = localStorage.getItem('sb-brjbdmxdtaljkvhxtefm-auth-token');
+      }, 0);
+    } catch (err) {
+      const msg = err.message || '';
+      if (msg.includes('Invalid login'))    setError('Invalid email or password.');
+      else if (msg.includes('Email not confirmed')) setError('Please confirm your email before logging in.');
+      else setError(msg || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
+
+  // Navigate once auth is set
+  useEffect(() => {
+    if (auth) {
+      if (auth.role === 'admin')     navigate('/admin/dashboard');
+      else if (auth.role === 'professor') navigate('/professor/dashboard');
+      else navigate('/student/dashboard');
+    }
+  }, [auth]);
 
   const { Icon: ActiveIcon, label: activeLabel } = PILLARS[activeIdx];
 
@@ -149,7 +156,7 @@ const LoginPage = () => {
 
         {/* Bottom credentials hint */}
         <div className="relative z-10 px-10 pb-8">
-          <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-3">Demo Credentials (pass: 123)</p>
+          <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-3">Demo Credentials (pass: Role@123)</p>
           <div className="flex flex-col gap-1.5">
             {CREDENTIALS.map(c => (
               <div key={c.role} className="flex items-center gap-3 text-xs">
@@ -286,12 +293,12 @@ const LoginPage = () => {
             <p className="text-[11px] text-gray-400 font-bold uppercase tracking-wider mb-3 text-center">Quick Demo Login</p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { label: 'Admin',     email: 'admin@nss.com',   color: 'border-[#102167]/20 hover:border-[#102167] hover:bg-[#eef2ff] text-[#102167]'  },
-                { label: 'Professor', email: 'prof@nss.com',    color: 'border-amber-200   hover:border-amber-400 hover:bg-amber-50  text-amber-700'    },
-                { label: 'Student',   email: 'student@nss.com', color: 'border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 text-emerald-700'},
+                { label: 'Admin',     email: 'admin@nss.com',   password: 'Admin@123',   color: 'border-[#102167]/20 hover:border-[#102167] hover:bg-[#eef2ff] text-[#102167]'  },
+                { label: 'Professor', email: 'prof@nss.com',    password: 'Prof@123',    color: 'border-amber-200   hover:border-amber-400 hover:bg-amber-50  text-amber-700'    },
+                { label: 'Student',   email: 'student@nss.com', password: 'Student@123', color: 'border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 text-emerald-700'},
               ].map(q => (
                 <button key={q.label} type="button"
-                  onClick={() => { setEmail(q.email); setPassword('123'); }}
+                  onClick={() => { setEmail(q.email); setPassword(q.password); }}
                   className={`py-2.5 px-3 rounded-xl border-2 text-xs font-extrabold transition-all duration-200 bg-white ${q.color}`}>
                   {q.label}
                 </button>
