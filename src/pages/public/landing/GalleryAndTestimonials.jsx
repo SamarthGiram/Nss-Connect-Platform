@@ -79,6 +79,7 @@ const testimonials = [
     quote: 'NSS transformed my outlook on life. The community service activities taught me empathy and leadership beyond textbooks.',
     avatar: 'PS',
     color: 'bg-[#102167]',
+    rating: 5,
   },
   {
     name: 'Rahul Patil',
@@ -86,13 +87,55 @@ const testimonials = [
     quote: 'Being an NSS secretary helped me develop organisational skills. The motto "Not Me But You" is something I live by every day.',
     avatar: 'RP',
     color: 'bg-[#ef7041]',
+    rating: 5,
+  },
+  {
+    name: 'Soham Kale',
+    role: 'NSS Volunteer, 3rd Year',
+    quote: 'Organizing the Swachhta Abhiyan taught me how small steps can lead to clean, healthy surroundings. Proud to be an NSS member.',
+    avatar: 'SK',
+    color: 'bg-emerald-600',
+    rating: 5,
+  },
+  {
+    name: 'Anniruddha Sonwane',
+    role: 'NSS Volunteer, 2nd Year',
+    quote: 'Developing solutions for local communities during the Special Youth Camp gave me a real-world perspective on engineering and social service.',
+    avatar: 'AS',
+    color: 'bg-indigo-600',
+    rating: 5,
+  },
+  {
+    name: 'Harshit Jadhav',
+    role: 'NSS Volunteer, 2nd Year',
+    quote: 'Volunteering at the blood donation camps was an eye-opener. It showed me how teamwork and community effort save lives in emergencies.',
+    avatar: 'HJ',
+    color: 'bg-rose-600',
+    rating: 4.5,
+  },
+  {
+    name: 'Adwait Chavhan',
+    role: 'NSS Core Committee Member',
+    quote: 'NSS has helped me grow as a leader. Managing campaigns and coordinating with students has given me immense civic responsibility.',
+    avatar: 'AC',
+    color: 'bg-[#ef7041]',
+    rating: 5,
+  },
+  {
+    name: 'Sahil Tikande',
+    role: 'NSS Volunteer, 3rd Year',
+    quote: 'The digital literacy and rural teaching programs were extremely rewarding. Teaching children in adopted villages is a feeling like no other.',
+    avatar: 'ST',
+    color: 'bg-teal-600',
+    rating: 4.5,
   },
   {
     name: 'Ananya Kulkarni',
     role: 'NSS Volunteer, 3rd Year',
     quote: 'The blood donation camp we organised saved real lives. NSS gives you a purpose beyond your own ambitions.',
     avatar: 'AK',
-    color: 'bg-emerald-600',
+    color: 'bg-[#102167]',
+    rating: 5,
   },
 ];
 
@@ -123,13 +166,27 @@ const GalleryAndTestimonials = () => {
             transform: translateX(-50%);
           }
         }
+        @keyframes marquee-reverse {
+          0% {
+            transform: translateX(-50%);
+          }
+          100% {
+            transform: translateX(0);
+          }
+        }
         .animate-marquee-sync {
           display: flex;
           width: max-content;
           animation: marquee 45s linear infinite;
         }
+        .animate-marquee-testimonials {
+          display: flex;
+          width: max-content;
+          animation: marquee-reverse 55s linear infinite;
+        }
         /* Pause scroll on hover */
-        .marquee-container:hover .animate-marquee-sync {
+        .marquee-container:hover .animate-marquee-sync,
+        .marquee-container:hover .animate-marquee-testimonials {
           animation-play-state: paused;
         }
       `}</style>
@@ -194,49 +251,52 @@ const GalleryAndTestimonials = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 bg-gradient-to-b from-[#fdf8f4] to-[#ece9f8]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <span className="text-xs font-bold text-[#ef7041] uppercase tracking-widest">Voices</span>
-            <h2 className="text-4xl font-extrabold text-[#102167] mt-2">
-              What Volunteers <span className="text-[#ef7041]">Say</span>
-            </h2>
-            <div className="w-16 h-1 bg-gradient-to-r from-[#102167] to-[#ef7041] rounded-full mx-auto mt-4"></div>
-          </div>
+      <section className="py-24 bg-gradient-to-b from-[#fdf8f4] to-[#ece9f8] overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 mb-16 text-center">
+          <span className="text-xs font-bold text-[#ef7041] uppercase tracking-widest">Voices</span>
+          <h2 className="text-4xl font-extrabold text-[#102167] mt-2">
+            What Volunteers <span className="text-[#ef7041]">Say</span>
+          </h2>
+          <div className="w-16 h-1 bg-gradient-to-r from-[#102167] to-[#ef7041] rounded-full mx-auto mt-4"></div>
+        </div>
 
-          <div ref={testimonialsRef} className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => {
-              const delayClass = i === 0 ? 'delay-75' : i === 1 ? 'delay-150' : 'delay-300';
-              return (
-                <div
-                  key={i}
-                  className={`bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 border border-gray-100/80 relative opacity-0 ${testimonialsVisible ? `reveal-fade-in-up ${delayClass}` : ''}`}
-                >
-                  {/* Accent Star Group */}
-                  <div className="flex gap-1 mb-5">
-                    {[...Array(5)].map((_, s) => (
-                      <HiOutlineStar key={s} size={15} className="text-[#ef7041] fill-[#ef7041]" />
-                    ))}
+        {/* Infinite Marquee Loop Slider (Reverse direction) - W-FULL OUTSIDE OF MAX-W CONTAINER */}
+        <div className="marquee-container relative w-full overflow-hidden py-4 bg-gray-50/20 border-y border-gray-100/50">
+          <div className="animate-marquee-testimonials flex gap-8 px-4">
+            {/* Double the list to support infinite loop */}
+            {[...testimonials, ...testimonials].map((t, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-3xl p-8 shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-gray-100/80 relative w-[380px] flex-shrink-0 flex flex-col justify-between"
+              >
+                <div>
+                  {/* Star Group (No numeric rating text) */}
+                  <div className="flex items-center mb-5">
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, s) => (
+                        <HiOutlineStar key={s} size={15} className={`text-[#ef7041] ${s < Math.floor(t.rating) ? 'fill-[#ef7041]' : 'opacity-30'}`} />
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-8 italic">
+                  <p className="text-gray-600 text-sm leading-relaxed mb-6 italic">
                     "{t.quote}"
                   </p>
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`w-12 h-12 rounded-2xl ${t.color} flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0 shadow-md`}
-                    >
-                      {t.avatar}
-                    </div>
-                    <div>
-                      <p className="text-sm font-extrabold text-gray-800">{t.name}</p>
-                      <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-0.5">
-                        {t.role}
-                      </p>
-                    </div>
+                </div>
+                <div className="flex items-center gap-4 mt-auto">
+                  <div
+                    className={`w-12 h-12 rounded-2xl ${t.color} flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0 shadow-md`}
+                  >
+                    {t.avatar}
+                  </div>
+                  <div>
+                    <p className="text-sm font-extrabold text-gray-800 leading-tight">{t.name}</p>
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-1">
+                      {t.role}
+                    </p>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </section>

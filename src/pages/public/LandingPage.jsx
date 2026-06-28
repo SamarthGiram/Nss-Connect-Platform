@@ -3,6 +3,7 @@ import HeroSection from './landing/HeroSection';
 import AboutSection from './landing/AboutSection';
 import ActivitiesSection from './landing/ActivitiesSection';
 import StatsAndEvents from './landing/StatsAndEvents';
+import TeamAndFaq from './landing/TeamAndFaq';
 import GalleryAndTestimonials from './landing/GalleryAndTestimonials';
 import ContactAndFooter from './landing/ContactAndFooter';
 
@@ -13,6 +14,7 @@ const LandingPage = () => (
     <AboutSection />
     <ActivitiesSection />
     <StatsAndEvents />
+    <TeamAndFaq />
     <GalleryAndTestimonials />
     <ContactAndFooter />
   </div>
