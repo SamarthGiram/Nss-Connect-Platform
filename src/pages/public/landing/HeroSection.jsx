@@ -56,7 +56,7 @@ const HeroSection = () => {
           <div className="lg:col-span-5 space-y-10 text-center lg:text-left">
             {/* Accent Pill */}
             <div className="inline-flex items-center gap-2 bg-[#ef7041]/10 text-[#ef7041] px-5 py-2 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-widest border border-[#ef7041]/20 shadow-sm opacity-0 reveal-fade-in-up">
-              🚀 National Service Scheme Connect
+              🚀 NBNSTIC Sinhgad — Official NSS Platform
             </div>
 
             {/* Main Title */}
@@ -76,10 +76,24 @@ const HeroSection = () => {
             {/* Explore More CTA Button */}
             <div className="pt-2 opacity-0 reveal-fade-in-up delay-300">
               <Link to="/login"
-                className="inline-flex items-center gap-2 bg-[#102167] text-white font-bold px-10 py-5 rounded-full text-base sm:text-lg hover:bg-[#1a2f85] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 group border-none">
+                className="inline-flex items-center gap-2 bg-[#102167] text-white font-bold px-10 py-5 rounded-full text-base sm:text-lg hover:bg-[#1a2f85] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 group border-none cursor-pointer">
                 Explore More
                 <FiArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
+            </div>
+
+            {/* Compact Stats Row */}
+            <div className="pt-6 grid grid-cols-4 gap-2 border-t border-gray-200/50 max-w-lg opacity-0 reveal-fade-in-up delay-400">
+              {stats.map((s, idx) => (
+                <div key={idx} className="flex flex-col">
+                  <span className="text-xl sm:text-2xl font-black text-[#102167] tracking-tight">
+                    <CountUp end={s.value} suffix={s.suffix} />
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5 leading-none">
+                    {s.label}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -156,22 +170,33 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* ── Bottom Floating Stats Bar - Large & Padded ── */}
-      <div className="px-8 pb-8 z-10 w-full">
-        <div className="max-w-6xl mx-auto bg-white rounded-[32px] shadow-[0_16px_48px_rgba(0,0,0,0.05)] border border-gray-100/90 p-6 sm:p-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 divide-x divide-gray-100 text-center">
-            
-            {stats.map((s, idx) => (
-              <div key={idx} className="flex flex-col items-center justify-center px-4">
-                <span className="text-4xl sm:text-5xl font-black text-[#102167] tracking-tight">
-                  <CountUp end={s.value} suffix={s.suffix} />
-                </span>
-                <span className="text-[11px] sm:text-xs font-bold text-gray-400 mt-2.5 uppercase tracking-[0.15em] leading-none">
-                  {s.label}
-                </span>
+      {/* ── Bottom NSS Core Leadership Team Widget ── */}
+      <div className="px-8 pb-8 z-10 w-full opacity-0 reveal-fade-in-up delay-500">
+        <div className="max-w-6xl mx-auto bg-white rounded-[32px] shadow-[0_16px_48px_rgba(0,0,0,0.04)] border border-gray-100/90 p-5 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 text-center sm:text-left px-3">
+            <div>
+              <h4 className="font-extrabold text-[#102167] text-sm sm:text-base">NSS Core Leadership</h4>
+              <p className="text-[10px] sm:text-xs text-gray-400 font-semibold mt-0.5">Meet the key coordinators steering our social service initiatives.</p>
+            </div>
+            <div className="w-12 h-0.5 bg-[#ef7041] rounded-full hidden sm:block"></div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            {[
+              { name: 'Prof. Nilesh Patil', role: 'Program Officer', avatar: 'NP', bg: 'from-blue-600 to-indigo-600' },
+              { name: 'Soham Kale', role: 'Student President', avatar: 'SK', bg: 'from-[#102167] to-[#3b4da8]' },
+              { name: 'Ananya Kulkarni', role: 'Vice President', avatar: 'AK', bg: 'from-emerald-500 to-teal-500' },
+              { name: 'Rahul Patil', role: 'Secretary', avatar: 'RP', bg: 'from-[#ef7041] to-orange-500' }
+            ].map((m, idx) => (
+              <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50/50 rounded-2xl border border-gray-100/40 text-left">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${m.bg} flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-sm`}>
+                  {m.avatar}
+                </div>
+                <div className="overflow-hidden">
+                  <p className="font-extrabold text-gray-800 text-xs truncate leading-none">{m.name}</p>
+                  <p className="text-[9px] text-[#ef7041] font-bold mt-1.5 truncate uppercase tracking-wider leading-none">{m.role}</p>
+                </div>
               </div>
             ))}
-
           </div>
         </div>
       </div>
