@@ -3,59 +3,72 @@ import { HiOutlineStar } from 'react-icons/hi';
 import { FiPlay, FiX, FiVolume2, FiVolumeX } from 'react-icons/fi';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
 
-// High-quality mixed media list (4 images, 4 stock videos)
+// High-quality mixed media list (5 images, 5 local videos)
 const mediaItems = [
   {
     type: 'video',
-    src: 'https://assets.mixkit.co/videos/preview/mixkit-group-of-volunteers-planting-a-tree-40916-large.mp4',
-    thumbnail: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80',
-    label: 'Tree Plantation Drive',
+    src: '/nbnstic.nss_14050405_211733696.mp4',
+    thumbnail: '/nbnstic.nss_14050405_215848557.jpg',
+    label: 'NSS Environment Conservation',
     category: 'Environment',
   },
   {
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=80',
-    label: 'Blood Donation Camp',
-    category: 'Healthcare',
+    src: '/IMG-20260626-WA0018.jpg',
+    label: 'NSS Volunteer Orientation',
+    category: 'Community',
   },
   {
     type: 'video',
-    src: 'https://assets.mixkit.co/videos/preview/mixkit-volunteers-collecting-garbage-in-a-park-40909-large.mp4',
-    thumbnail: 'https://images.unsplash.com/photo-1618477388954-7852f32655ec?auto=format&fit=crop&w=600&q=80',
-    label: 'Swachhta Abhiyan',
-    category: 'Cleanliness',
+    src: '/nbnstic.nss_14050405_211817548.mp4',
+    thumbnail: '/nbnstic.nss_14050405_215901829.jpg',
+    label: 'Social Awareness Campaign',
+    category: 'Leadership',
   },
   {
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=80',
+    src: '/IMG-20260626-WA0020.jpg',
+    label: 'Swachhta Abhiyan Sanitation',
+    category: 'Cleanliness',
+  },
+  {
+    type: 'video',
+    src: '/lcs4society_14050405_215651553.mp4',
+    thumbnail: '/nbnstic.nss_14050405_215905583.jpg',
     label: 'Rural Education Camp',
     category: 'Education',
   },
   {
+    type: 'image',
+    src: '/IMG-20260626-WA0023.jpg',
+    label: 'Special Youth Camp',
+    category: 'Service',
+  },
+  {
     type: 'video',
-    src: 'https://assets.mixkit.co/videos/preview/mixkit-people-hands-stacked-together-in-unity-34533-large.mp4',
-    thumbnail: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=600&q=80',
-    label: 'Community Service',
+    src: '/nbnstic.nss_14050405_203132978.mp4',
+    thumbnail: '/nbnstic.nss_14050405_215917271.jpg',
+    label: 'Community Empowerment Camp',
+    category: 'Welfare',
+  },
+  {
+    type: 'image',
+    src: '/nbnstic.nss_14050405_215852537.jpg',
+    label: 'Blood Donation Drive',
+    category: 'Healthcare',
+  },
+  {
+    type: 'video',
+    src: '/nbnstic.nss_14050405_215643087.mp4',
+    thumbnail: '/nbnstic.nss_14050405_215921090.jpg',
+    label: 'Annual NSS Youth Meet',
     category: 'Unity',
   },
   {
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=1200&q=80',
-    label: 'Teaching Kids Program',
-    category: 'Education',
-  },
-  {
-    type: 'video',
-    src: 'https://assets.mixkit.co/videos/preview/mixkit-children-in-a-rural-school-writing-in-notebooks-50796-large.mp4',
-    thumbnail: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=600&q=80',
-    label: 'Rural School Development',
-    category: 'Development',
-  },
-  {
-    type: 'image',
-    src: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80',
-    label: 'Environment Day Awareness',
-    category: 'Campaign',
+    src: '/nbnstic.nss_14050405_215949817.jpg',
+    label: 'Clean and Green City Drive',
+    category: 'Environment',
   }
 ];
 
