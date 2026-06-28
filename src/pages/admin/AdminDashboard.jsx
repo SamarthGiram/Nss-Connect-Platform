@@ -12,8 +12,8 @@ const users   = Object.values(mockUsers);
 const students    = users.filter(u => u.role === 'student');
 const professors  = users.filter(u => u.role === 'professor');
 
-const StatCard = ({ icon: Icon, iconBg, label, value, sub, subColor }) => (
-  <div className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+const StatCard = ({ icon: Icon, iconBg, label, value, sub, subColor, onClick }) => (
+  <div onClick={onClick} className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md ${iconBg}`}>
       <Icon size={26} className="text-white" />
     </div>
@@ -35,10 +35,10 @@ const QuickLink = ({ icon: Icon, label, onClick }) => (
 );
 
 const recentActivity = [
-  { icon: HiOutlineCheckCircle, iconColor: 'text-emerald-600', iconBg: 'bg-emerald-50', text: 'Tree Plantation Drive attendance marked', time: '10 min ago' },
-  { icon: HiOutlineUserGroup,   iconColor: 'text-blue-600',    iconBg: 'bg-blue-50',    text: 'New student Priya Sharma registered',   time: '1 hr ago'  },
-  { icon: HiOutlineCalendar,    iconColor: 'text-[#102167]',   iconBg: 'bg-[#eef2ff]', text: 'Blood Donation Camp event created',       time: '2 hrs ago' },
-  { icon: HiOutlineExclamationCircle, iconColor: 'text-[#ef7041]', iconBg: 'bg-orange-50', text: '3 pending approval requests',        time: '3 hrs ago' },
+  { icon: HiOutlineCheckCircle, iconColor: 'text-emerald-600', iconBg: 'bg-emerald-50', text: 'Tree Plantation Drive attendance marked', time: '10 min ago', path: '/admin/attendance' },
+  { icon: HiOutlineUserGroup,   iconColor: 'text-blue-600',    iconBg: 'bg-blue-50',    text: 'New student Priya Sharma registered',   time: '1 hr ago',  path: '/admin/users' },
+  { icon: HiOutlineCalendar,    iconColor: 'text-[#102167]',   iconBg: 'bg-[#eef2ff]', text: 'Blood Donation Camp event created',       time: '2 hrs ago', path: '/admin/events' },
+  { icon: HiOutlineExclamationCircle, iconColor: 'text-[#ef7041]', iconBg: 'bg-orange-50', text: '3 pending approval requests',        time: '3 hrs ago', path: '/admin/approvals' },
 ];
 
 const pendingItems = [
@@ -56,10 +56,10 @@ const AdminDashboard = () => {
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <StatCard icon={HiOutlineCalendar}   iconBg="bg-gradient-to-br from-[#102167] to-[#3b4da8]" label="Total Events"    value={mockEvents.length} sub="This Semester"     subColor="text-gray-400" />
-        <StatCard icon={HiOutlineUserGroup}   iconBg="bg-gradient-to-br from-[#ef7041] to-[#f48b62]" label="Total Students"  value={`${students.length * 50}+`} sub="Active Volunteers" subColor="text-[#ef7041]" />
-        <StatCard icon={BsShieldCheck}        iconBg="bg-gradient-to-br from-emerald-400 to-green-500" label="Professors"    value={professors.length} sub="Faculty Members"  subColor="text-emerald-500" />
-        <StatCard icon={HiOutlineClipboardCheck} iconBg="bg-gradient-to-br from-violet-500 to-purple-600" label="Pending" value="3" sub="Need Approval"     subColor="text-violet-500" />
+        <StatCard icon={HiOutlineCalendar}   iconBg="bg-gradient-to-br from-[#102167] to-[#3b4da8]" label="Total Events"    value={mockEvents.length} sub="This Semester"     subColor="text-gray-400" onClick={() => navigate('/admin/events')} />
+        <StatCard icon={HiOutlineUserGroup}   iconBg="bg-gradient-to-br from-[#ef7041] to-[#f48b62]" label="Total Students"  value={`${students.length * 50}+`} sub="Active Volunteers" subColor="text-[#ef7041]" onClick={() => navigate('/admin/users')} />
+        <StatCard icon={BsShieldCheck}        iconBg="bg-gradient-to-br from-emerald-400 to-green-500" label="Professors"    value={professors.length} sub="Faculty Members"  subColor="text-emerald-500" onClick={() => navigate('/admin/users')} />
+        <StatCard icon={HiOutlineClipboardCheck} iconBg="bg-gradient-to-br from-violet-500 to-purple-600" label="Pending" value="3" sub="Need Approval"     subColor="text-violet-500" onClick={() => navigate('/admin/approvals')} />
       </div>
 
       {/* ── Row 2: Events + Quick Stats ── */}
@@ -71,7 +71,8 @@ const AdminDashboard = () => {
             <h3 className="text-base font-extrabold text-gray-800 flex items-center gap-2">
               <HiOutlineCalendar size={18} className="text-[#102167]" /> Recent Events
             </h3>
-            <button className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#102167] bg-[#eef2ff] px-3 py-1.5 rounded-lg hover:bg-[#102167] hover:text-white transition-all duration-200">
+            <button onClick={() => navigate('/admin/events')}
+              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#102167] bg-[#eef2ff] px-3 py-1.5 rounded-lg hover:bg-[#102167] hover:text-white transition-all duration-200 border-none bg-transparent">
               View All <FiArrowRight size={11} />
             </button>
           </div>
@@ -79,7 +80,8 @@ const AdminDashboard = () => {
             {mockEvents.map(ev => {
               const d = new Date(ev.date);
               return (
-                <div key={ev.id} className="flex items-center gap-4 p-3.5 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors group">
+                <div key={ev.id} onClick={() => navigate('/admin/events')}
+                  className="flex items-center gap-4 p-3.5 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors group cursor-pointer">
                   <div className="w-12 h-12 bg-gradient-to-br from-[#102167] to-[#3b4da8] rounded-xl flex flex-col items-center justify-center text-white flex-shrink-0">
                     <p className="text-sm font-extrabold leading-none">{d.getDate()}</p>
                     <p className="text-[9px] font-bold text-blue-200 uppercase">{d.toLocaleString('default',{month:'short'})}</p>
@@ -106,7 +108,8 @@ const AdminDashboard = () => {
             { title: 'Tree Plantation Drive', venue: 'Green Park, Pune', date: '28 Jun' },
             { title: 'Swachhta Abhiyan',      venue: 'Municipal Area',   date: '12 Jul' },
           ].map((ev, i) => (
-            <div key={i} className="flex items-center gap-4 p-3.5 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors group mt-3">
+            <div key={i} onClick={() => navigate('/admin/events')}
+              className="flex items-center gap-4 p-3.5 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors group mt-3 cursor-pointer">
               <div className="w-12 h-12 bg-gradient-to-br from-[#ef7041] to-[#f48b62] rounded-xl flex flex-col items-center justify-center text-white flex-shrink-0">
                 <p className="text-[10px] font-extrabold leading-none">{ev.date}</p>
               </div>
@@ -200,7 +203,9 @@ const AdminDashboard = () => {
           {recentActivity.map((act, i) => {
             const IC = act.icon;
             return (
-              <div key={i} className="flex items-center gap-3 p-3.5 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors">
+              <button key={i}
+                onClick={() => navigate(act.path)}
+                className="w-full flex items-center gap-3 p-3.5 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors text-left border-none shadow-none hover:shadow-none bg-transparent">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${act.iconBg}`}>
                   <IC size={17} className={act.iconColor} />
                 </div>
@@ -208,7 +213,7 @@ const AdminDashboard = () => {
                   <p className="text-sm font-semibold text-gray-700">{act.text}</p>
                 </div>
                 <span className="text-[10px] text-gray-400 font-medium flex-shrink-0">{act.time}</span>
-              </div>
+              </button>
             );
           })}
         </div>

@@ -199,8 +199,15 @@ export const AuthProvider = ({ children }) => {
     );
   }
 
+  const updateAuth = (updates) => {
+    setAuth(prev => {
+      if (!prev) return null;
+      return { ...prev, ...updates };
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ auth, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ auth, login, register, logout, loading, updateAuth }}>
       {children}
     </AuthContext.Provider>
   );

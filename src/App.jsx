@@ -19,7 +19,7 @@ import ProfessorDashboard from './pages/professor/ProfessorDashboard';
 import ProfessorEvents from './pages/professor/ProfessorEvents';
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentEvents from './pages/student/StudentEvents';
-import StudentProfile from './pages/student/StudentProfile';
+import Profile from './pages/shared/Profile';
 import StudentAnnouncements from './pages/student/StudentAnnouncements';
 import TakeAttendance from './pages/professor/TakeAttendance';
 import ProfessorManageStudents from './pages/professor/ProfessorManageStudents';
@@ -45,6 +45,7 @@ function App() {
               <Route path="approvals"     element={<PendingApprovals />} />
               <Route path="announcements" element={<ManageAnnouncements />} />
               <Route path="attendance"    element={<TakeAttendance />} />
+              <Route path="profile"       element={<Profile />} />
             </Route>
           </Route>
 
@@ -57,6 +58,7 @@ function App() {
               <Route path="announcements" element={<ManageAnnouncements />} />
               <Route path="approvals"     element={<PendingApprovals />} />
               <Route path="students"      element={<ProfessorManageStudents />} />
+              <Route path="profile"       element={<Profile />} />
             </Route>
           </Route>
 
@@ -66,7 +68,7 @@ function App() {
               <Route path="dashboard"     element={<StudentDashboard />} />
               <Route path="events"        element={<StudentEvents />} />
               <Route path="attendance"    element={<MyAttendance />} />
-              <Route path="profile"       element={<StudentProfile />} />
+              <Route path="profile"       element={<Profile />} />
               <Route path="announcements" element={<StudentAnnouncements />} />
             </Route>
           </Route>

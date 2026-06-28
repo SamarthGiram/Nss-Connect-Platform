@@ -55,18 +55,18 @@ const HeroSection = () => {
           {/* ── LEFT COLUMN ── */}
           <div className="lg:col-span-5 space-y-10 text-center lg:text-left">
             {/* Accent Pill */}
-            <div className="inline-flex items-center gap-2 bg-[#ef7041]/10 text-[#ef7041] px-5 py-2 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-widest border border-[#ef7041]/20 shadow-sm">
+            <div className="inline-flex items-center gap-2 bg-[#ef7041]/10 text-[#ef7041] px-5 py-2 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-widest border border-[#ef7041]/20 shadow-sm opacity-0 reveal-fade-in-up">
               🚀 National Service Scheme Connect
             </div>
 
             {/* Main Title */}
-            <h1 className="text-[56px] sm:text-[76px] lg:text-[88px] font-black leading-[1.04] tracking-tight">
+            <h1 className="text-[56px] sm:text-[76px] lg:text-[88px] font-black leading-[1.04] tracking-tight opacity-0 reveal-fade-in-up delay-100">
               <span className="block text-[#102167]">Not Me</span>
               <span className="block text-[#ef7041] mt-1.5">But You</span>
             </h1>
 
             {/* Subtitle with Left Accent Bar */}
-            <div className="flex gap-4 items-stretch max-w-lg mx-auto lg:mx-0">
+            <div className="flex gap-4 items-stretch max-w-lg mx-auto lg:mx-0 opacity-0 reveal-fade-in-up delay-200">
               <div className="w-1.5 bg-gradient-to-b from-[#102167] to-[#ef7041] rounded-full hidden sm:block"></div>
               <p className="text-base sm:text-[19px] text-gray-500 font-medium leading-relaxed text-center sm:text-left py-0.5">
                 Together we can create a better society and a stronger nation.
@@ -74,9 +74,9 @@ const HeroSection = () => {
             </div>
 
             {/* Explore More CTA Button */}
-            <div className="pt-2">
+            <div className="pt-2 opacity-0 reveal-fade-in-up delay-300">
               <Link to="/login"
-                className="inline-flex items-center gap-2 bg-[#102167] text-white font-bold px-10 py-5 rounded-full text-base sm:text-lg hover:bg-[#1a2f85] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 group">
+                className="inline-flex items-center gap-2 bg-[#102167] text-white font-bold px-10 py-5 rounded-full text-base sm:text-lg hover:bg-[#1a2f85] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 group border-none">
                 Explore More
                 <FiArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -84,7 +84,7 @@ const HeroSection = () => {
           </div>
 
           {/* ── RIGHT COLUMN: CIRCULAR & DYNAMIC GRAPHIC (Enlarged Layout) ── */}
-          <div className="lg:col-span-7 flex items-center justify-center relative w-full h-[480px] sm:h-[620px] lg:h-[680px]">
+          <div className="lg:col-span-7 flex items-center justify-center relative w-full h-[480px] sm:h-[620px] lg:h-[680px] opacity-0 reveal-scale-up delay-200">
             
             {/* Multiple Background Accent Rotating Rings */}
             <div className="absolute w-[440px] h-[440px] sm:w-[580px] sm:h-[580px] lg:w-[620px] lg:h-[620px] rounded-full border border-gray-200/50 pointer-events-none z-0"></div>

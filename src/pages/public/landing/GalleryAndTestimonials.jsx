@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { HiOutlineStar } from 'react-icons/hi';
 import { FiPlay, FiX, FiVolume2, FiVolumeX } from 'react-icons/fi';
+import { useScrollReveal } from '../../../hooks/useScrollReveal';
 
 // High-quality mixed media list (4 images, 4 stock videos)
 const mediaItems = [
@@ -86,6 +87,7 @@ const GalleryAndTestimonials = () => {
   const [activeMedia, setActiveMedia] = useState(null);
   const [modalMuted, setModalMuted] = useState(false);
   const videoRefs = useRef([]);
+  const [testimonialsRef, testimonialsVisible] = useScrollReveal();
 
   const openLightbox = (item) => {
     setActiveMedia(item);
@@ -189,36 +191,39 @@ const GalleryAndTestimonials = () => {
             <div className="w-16 h-1 bg-gradient-to-r from-[#102167] to-[#ef7041] rounded-full mx-auto mt-4"></div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 border border-gray-100/80 relative"
-              >
-                {/* Accent Star Group */}
-                <div className="flex gap-1 mb-5">
-                  {[...Array(5)].map((_, s) => (
-                    <HiOutlineStar key={s} size={15} className="text-[#ef7041] fill-[#ef7041]" />
-                  ))}
-                </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-8 italic">
-                  "{t.quote}"
-                </p>
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`w-12 h-12 rounded-2xl ${t.color} flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0 shadow-md`}
-                  >
-                    {t.avatar}
+          <div ref={testimonialsRef} className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((t, i) => {
+              const delayClass = i === 0 ? 'delay-75' : i === 1 ? 'delay-150' : 'delay-300';
+              return (
+                <div
+                  key={i}
+                  className={`bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 border border-gray-100/80 relative opacity-0 ${testimonialsVisible ? `reveal-fade-in-up ${delayClass}` : ''}`}
+                >
+                  {/* Accent Star Group */}
+                  <div className="flex gap-1 mb-5">
+                    {[...Array(5)].map((_, s) => (
+                      <HiOutlineStar key={s} size={15} className="text-[#ef7041] fill-[#ef7041]" />
+                    ))}
                   </div>
-                  <div>
-                    <p className="text-sm font-extrabold text-gray-800">{t.name}</p>
-                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-0.5">
-                      {t.role}
-                    </p>
+                  <p className="text-gray-600 text-sm leading-relaxed mb-8 italic">
+                    "{t.quote}"
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`w-12 h-12 rounded-2xl ${t.color} flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0 shadow-md`}
+                    >
+                      {t.avatar}
+                    </div>
+                    <div>
+                      <p className="text-sm font-extrabold text-gray-800">{t.name}</p>
+                      <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-0.5">
+                        {t.role}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

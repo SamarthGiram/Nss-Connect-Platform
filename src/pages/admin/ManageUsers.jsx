@@ -5,7 +5,8 @@ import {
   HiOutlineShieldCheck, HiOutlineCheckCircle, HiOutlineXCircle
 } from 'react-icons/hi';
 import { FiSave, FiX, FiRefreshCw } from 'react-icons/fi';
-import { fetchAllUsers, updateUserProfile, createProfessorAccount } from '../../services/usersService';
+import { fetchAllUsers, updateUserProfile, createUserAccount, deleteUserProfile } from '../../services/usersService';
+import { parseProfile } from '../../utils/avatarParser';
 
 const initUsers = [
   { id: 'u1', name: 'Samarth Giram',    email: 'student@nss.com',   role: 'student',   group: 'Group A', status: 'Active',   joined: 'Jun 2023' },
@@ -36,6 +37,8 @@ const ManageUsers = () => {
   const [editId, setEditId]     = useState(null);
   const [form, setForm]         = useState(EMPTY);
   const [saving, setSaving]     = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
 
   const loadUsers = async () => {
     try {
@@ -78,14 +81,18 @@ const ManageUsers = () => {
   };
 
   const handleDelete = async (id) => {
-    if (confirm('Are you sure you want to delete this user?')) {
-      try {
-        await updateUserProfile(id, { status: 'deleted' });
-        setUsers(prev => prev.filter(u => u.id !== id));
-      } catch (err) {
-        alert('Delete failed: ' + err.message);
-      }
+    try {
+      await deleteUserProfile(id);
+      setUsers(prev => prev.filter(u => u.id !== id));
+      setDeleteConfirmId(null);
+    } catch (err) {
+      alert('Delete failed: ' + err.message);
     }
+  };
+
+  const requestDelete = (id, name) => {
+    setDeleteConfirmId(id);
+    setDeleteConfirmName(name);
   };
 
   const handleSave = async () => {
@@ -93,14 +100,10 @@ const ManageUsers = () => {
     setSaving(true);
     try {
       if (!editId) {
-        // Create new user (currently restricted to Professor)
         if (!form.password || form.password.length < 6) {
           throw new Error('Password must be at least 6 characters.');
         }
-        if (form.role !== 'professor') {
-          throw new Error('You can only create Professor accounts directly.');
-        }
-        const newUser = await createProfessorAccount(form.email, form.password, form.name);
+        const newUser = await createUserAccount(form.email, form.password, form.name, form.role);
         // Refresh the list
         await loadUsers();
       } else {
@@ -140,10 +143,12 @@ const ManageUsers = () => {
           <p className="text-sm text-gray-400 font-medium mt-0.5">View, add and manage all NSS members</p>
         </div>
         <button onClick={openCreate}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#102167] text-white text-sm font-bold rounded-xl hover:bg-[#ef7041] transition-all duration-300 shadow-md">
-          <HiOutlinePlus size={16}/> Add Professor
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#102167] text-white text-sm font-bold rounded-xl hover:bg-[#ef7041] transition-all duration-300 shadow-md border-none cursor-pointer">
+          <HiOutlinePlus size={16}/> Add User
         </button>
       </div>
+
+
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
@@ -186,57 +191,63 @@ const ManageUsers = () => {
 
       {/* Add/Edit Form */}
       {showForm && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border-2 border-[#102167]/20">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="font-extrabold text-gray-800">{editId ? 'Edit User' : 'Add New Professor'}</h3>
-            <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><FiX size={18}/></button>
-          </div>
-          <div className="grid md:grid-cols-3 gap-4">
-            {[
-              { label:'Full Name', key:'name',  type:'text',  placeholder:'Enter full name' },
-              { label:'Email',     key:'email', type:'email', placeholder:'Enter email address', disabled: !!editId },
-              ...(!editId ? [{ label: 'Password', key: 'password', type: 'text', placeholder: 'Create a strong password' }] : [])
-            ].map(f => (
-              <div key={f.key}>
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">{f.label}</label>
-                <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({...p,[f.key]:e.target.value}))} placeholder={f.placeholder}
-                  disabled={f.disabled}
-                  className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold focus:border-[#102167] focus:ring-4 focus:ring-[#102167]/10 outline-none transition-all disabled:opacity-60"/>
-              </div>
-            ))}
-            <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Role</label>
-              <select value={form.role} onChange={e => setForm(p => ({...p,role:e.target.value}))}
-                className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold focus:border-[#102167] outline-none">
-                {['student','professor','admin'].map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase()+r.slice(1)}</option>)}
-              </select>
+        <div className="fixed inset-0 bg-black/45 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
+          <div className="bg-white rounded-3xl p-6 shadow-2xl border border-gray-100 max-w-3xl w-full animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-extrabold text-[#102167] text-lg">{editId ? 'Edit User Details' : 'Add New User'}</h3>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 border-none bg-transparent cursor-pointer"><FiX size={18}/></button>
             </div>
-            {form.role === 'student' && (
+            <div className="grid md:grid-cols-3 gap-4">
+              {[
+                { label:'Full Name', key:'name',  type:'text',  placeholder:'Enter full name' },
+                { label:'Email',     key:'email', type:'email', placeholder:'Enter email address', disabled: !!editId },
+                ...(!editId ? [{ label: 'Password', key: 'password', type: 'text', placeholder: 'Create a strong password' }] : [])
+              ].map(f => (
+                <div key={f.key}>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">{f.label}</label>
+                  <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({...p,[f.key]:e.target.value}))} placeholder={f.placeholder}
+                    disabled={f.disabled}
+                    className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold focus:border-[#102167] focus:ring-4 focus:ring-[#102167]/10 outline-none transition-all disabled:opacity-60"/>
+                </div>
+              ))}
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Group</label>
-                <select value={form.group} onChange={e => setForm(p => ({...p,group:e.target.value}))}
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Role</label>
+                <select value={form.role} onChange={e => setForm(p => ({...p,role:e.target.value}))}
                   className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold focus:border-[#102167] outline-none">
-                  {['Group A','Group B','Group C','Group D'].map(g => <option key={g}>{g}</option>)}
+                  {['student','professor','admin'].map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase()+r.slice(1)}</option>)}
                 </select>
               </div>
-            )}
-            <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Status</label>
-              <select value={form.status} onChange={e => setForm(p => ({...p,status:e.target.value}))}
-                className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold focus:border-[#102167] outline-none">
-                {['Active','Inactive'].map(s => <option key={s}>{s}</option>)}
-              </select>
+              {form.role === 'student' && (
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Group</label>
+                  <select value={form.group} onChange={e => setForm(p => ({...p,group:e.target.value}))}
+                    className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold focus:border-[#102167] outline-none">
+                    {['Group A','Group B','Group C','Group D'].map(g => <option key={g}>{g}</option>)}
+                  </select>
+                </div>
+              )}
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Status</label>
+                <select value={form.status} onChange={e => setForm(p => ({...p,status:e.target.value}))}
+                  className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold focus:border-[#102167] outline-none">
+                  {[
+                    { value: 'active', label: 'Active' },
+                    { value: 'suspended', label: 'Suspended' },
+                    { value: 'pending', label: 'Pending' }
+                  ].map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-3 mt-4">
-            <button onClick={handleSave}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#102167] text-white text-sm font-bold rounded-xl hover:bg-[#1a2f85] transition-all shadow-md">
-              <FiSave size={14}/> {editId ? 'Save Changes' : 'Add User'}
-            </button>
-            <button onClick={() => setShowForm(false)}
-              className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-600 text-sm font-bold rounded-xl hover:bg-gray-200 transition-all">
-              <FiX size={14}/> Cancel
-            </button>
+            <div className="flex gap-3 mt-4">
+              <button onClick={handleSave}
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#102167] text-white text-sm font-bold rounded-xl hover:bg-[#1a2f85] transition-all shadow-md border-none cursor-pointer">
+                <FiSave size={14}/> {editId ? 'Save Changes' : 'Add User'}
+              </button>
+              <button onClick={() => setShowForm(false)}
+                className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-600 text-sm font-bold rounded-xl hover:bg-gray-200 transition-all border-none cursor-pointer">
+                <FiX size={14}/> Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -265,16 +276,22 @@ const ManageUsers = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {filtered.filter(u => u.role === 'student').map(u => (
+                {filtered.filter(u => u.role === 'student').map(u => {
+                  const parsed = parseProfile(u);
+                  return (
                   <tr key={u.id} className="hover:bg-gray-50/60 transition-colors group">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#102167] to-[#3b4da8] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                          {u.name[0]}
+                        <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${parsed.avatar_theme || 'from-[#102167] to-[#3b4da8]'} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 overflow-hidden`}>
+                          {parsed.avatar_img ? (
+                            <img src={parsed.avatar_img} alt={parsed.name} className="w-full h-full object-cover" />
+                          ) : (
+                            parsed.avatar_icon || parsed.name?.[0] || '?'
+                          )}
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-gray-800 leading-tight">{u.name}</p>
-                          <p className="text-[10px] text-gray-400 font-medium">{u.email}</p>
+                          <p className="text-xs font-bold text-gray-800 leading-tight">{parsed.name}</p>
+                          <p className="text-[10px] text-gray-400 font-medium">{parsed.email}</p>
                         </div>
                       </div>
                     </td>
@@ -284,23 +301,23 @@ const ManageUsers = () => {
                     <td className="px-5 py-3">
                       <button onClick={() => toggleStatus(u.id, u.status)}
                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-extrabold transition-all
-                          ${u.status === 'Active' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
-                        {u.status === 'Active' ? <HiOutlineCheckCircle size={10}/> : <HiOutlineXCircle size={10}/>}
-                        {u.status}
+                          ${u.status === 'active' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}>
+                        {u.status === 'active' ? <HiOutlineCheckCircle size={10}/> : <HiOutlineXCircle size={10}/>}
+                        {u.status.charAt(0).toUpperCase() + u.status.slice(1)}
                       </button>
                     </td>
                     <td className="px-5 py-3">
-                      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1.5">
                         <button onClick={() => openEdit(u)} className="p-1.5 bg-[#eef2ff] text-[#102167] rounded-md hover:bg-[#102167] hover:text-white transition-all">
                           <HiOutlinePencil size={12}/>
                         </button>
-                        <button onClick={() => handleDelete(u.id)} className="p-1.5 bg-red-50 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition-all">
+                        <button onClick={() => requestDelete(parsed.id, parsed.name)} className="p-1.5 bg-red-50 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition-all border-none cursor-pointer">
                           <HiOutlineTrash size={12}/>
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
             {filtered.filter(u => u.role === 'student').length === 0 && (
@@ -333,18 +350,23 @@ const ManageUsers = () => {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {filtered.filter(u => u.role === 'professor' || u.role === 'admin').map(u => {
-                  const rs = ROLE_STYLES[u.role] || ROLE_STYLES.professor;
+                  const parsed = parseProfile(u);
+                  const rs = ROLE_STYLES[parsed.role] || ROLE_STYLES.professor;
                   const RIC = rs.icon;
                   return (
                     <tr key={u.id} className="hover:bg-gray-50/60 transition-colors group">
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                            {u.name[0]}
+                          <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${parsed.avatar_theme || 'from-amber-400 to-orange-500'} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 overflow-hidden`}>
+                            {parsed.avatar_img ? (
+                              <img src={parsed.avatar_img} alt={parsed.name} className="w-full h-full object-cover" />
+                            ) : (
+                              parsed.avatar_icon || parsed.name?.[0] || '?'
+                            )}
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-gray-800 leading-tight">{u.name}</p>
-                            <p className="text-[10px] text-gray-400 font-medium">{u.email}</p>
+                            <p className="text-xs font-bold text-gray-800 leading-tight">{parsed.name}</p>
+                            <p className="text-[10px] text-gray-400 font-medium">{parsed.email}</p>
                           </div>
                         </div>
                       </td>
@@ -356,17 +378,17 @@ const ManageUsers = () => {
                       <td className="px-5 py-3">
                         <button onClick={() => toggleStatus(u.id, u.status)}
                           className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-extrabold transition-all
-                            ${u.status === 'Active' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
-                          {u.status === 'Active' ? <HiOutlineCheckCircle size={10}/> : <HiOutlineXCircle size={10}/>}
-                          {u.status}
+                            ${u.status === 'active' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}>
+                          {u.status === 'active' ? <HiOutlineCheckCircle size={10}/> : <HiOutlineXCircle size={10}/>}
+                          {u.status.charAt(0).toUpperCase() + u.status.slice(1)}
                         </button>
                       </td>
                       <td className="px-5 py-3">
-                        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1.5">
                           <button onClick={() => openEdit(u)} className="p-1.5 bg-[#eef2ff] text-[#102167] rounded-md hover:bg-[#102167] hover:text-white transition-all">
                             <HiOutlinePencil size={12}/>
                           </button>
-                          <button onClick={() => handleDelete(u.id)} className="p-1.5 bg-red-50 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition-all">
+                          <button onClick={() => requestDelete(parsed.id, parsed.name)} className="p-1.5 bg-red-50 text-red-500 rounded-md hover:bg-red-500 hover:text-white transition-all border-none cursor-pointer">
                             <HiOutlineTrash size={12}/>
                           </button>
                         </div>
@@ -385,6 +407,33 @@ const ManageUsers = () => {
         </div>
 
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black/45 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setDeleteConfirmId(null)}>
+          <div className="bg-white rounded-3xl p-6 shadow-2xl border border-gray-100 max-w-md w-full animate-scale-up" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                ⚠️
+              </div>
+              <h3 className="font-extrabold text-gray-800 text-lg">Delete User?</h3>
+              <p className="text-sm text-gray-400 font-semibold mt-2 px-2">
+                Are you sure you want to delete <span className="text-red-600 font-bold">{deleteConfirmName}</span>? This action is permanent and cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setDeleteConfirmId(null)}
+                className="flex-1 py-3 bg-gray-100 text-gray-600 text-sm font-bold rounded-xl hover:bg-gray-200 transition-all border-none cursor-pointer">
+                Cancel
+              </button>
+              <button onClick={() => handleDelete(deleteConfirmId)}
+                className="flex-1 py-3 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all shadow-md shadow-red-100 border-none cursor-pointer">
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
