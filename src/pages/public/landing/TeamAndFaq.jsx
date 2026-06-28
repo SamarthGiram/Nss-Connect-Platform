@@ -4,32 +4,36 @@ import { HiOutlineQuestionMarkCircle } from 'react-icons/hi';
 
 const teamMembers = [
   {
-    name: 'Prof. Nilesh Patil',
-    role: 'NSS Program Officer',
-    avatar: 'NP',
-    bg: 'from-blue-600 to-indigo-600',
-    desc: 'Guiding unit activities and university coordination.'
+    name: 'Prof. Atul Ballal',
+    role: 'NSS Chief Officer',
+    avatar: 'AB',
+    bg: 'from-blue-700 to-indigo-700',
+    photo: null,
+    desc: 'Overseeing NSS unit operations and university coordination.'
   },
   {
-    name: 'Soham Kale',
-    role: 'Student President',
-    avatar: 'SK',
+    name: 'Sahil Tikande',
+    role: 'NSS Lead',
+    avatar: 'ST',
     bg: 'from-[#102167] to-[#3b4da8]',
-    desc: 'Leading campaigns and student volunteer coordination.'
+    photo: '/core leadership/sahil tikande.jpeg',
+    desc: 'Leading student volunteers and managing core campaigns.'
   },
   {
-    name: 'Ananya Kulkarni',
-    role: 'Student Vice President',
-    avatar: 'AK',
+    name: 'Prathamesh Veer',
+    role: 'Operational Lead',
+    avatar: 'PV',
     bg: 'from-emerald-500 to-teal-500',
-    desc: 'Coordinating healthcare and environmental camps.'
+    photo: '/core leadership/prathamesh.jpeg',
+    desc: 'Driving day-to-day operations and event logistics.'
   },
   {
-    name: 'Rahul Patil',
-    role: 'NSS Unit Secretary',
-    avatar: 'RP',
+    name: 'Rushikesh Tekale',
+    role: 'Dadachi Shala Lead',
+    avatar: 'RT',
     bg: 'from-[#ef7041] to-orange-500',
-    desc: 'Managing reports, attendance, and correspondence.'
+    photo: '/core leadership/rushikesh.jpeg',
+    desc: 'Heading the rural education and village literacy program.'
   }
 ];
 
@@ -79,9 +83,17 @@ export const TeamSection = () => {
                 key={idx}
                 className={`bg-gray-50/50 rounded-3xl p-6 border border-gray-100 text-center hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group opacity-0 ${teamVisible ? `reveal-fade-in-up ${delayClass}` : ''}`}
               >
-                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${m.bg} flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-md group-hover:scale-105 transition-transform`}>
-                  {m.avatar}
-                </div>
+                {m.photo ? (
+                  <img
+                    src={m.photo}
+                    alt={m.name}
+                    className="w-20 h-20 rounded-2xl object-cover mx-auto mb-5 shadow-md group-hover:scale-105 transition-transform"
+                  />
+                ) : (
+                  <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${m.bg} flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-md group-hover:scale-105 transition-transform`}>
+                    {m.avatar}
+                  </div>
+                )}
                 <h3 className="font-extrabold text-gray-800 text-base group-hover:text-[#ef7041] transition-colors">{m.name}</h3>
                 <p className="text-xs text-[#ef7041] font-bold mt-1 uppercase tracking-wider">{m.role}</p>
                 <p className="text-xs text-gray-400 font-semibold mt-3 leading-relaxed px-2">{m.desc}</p>

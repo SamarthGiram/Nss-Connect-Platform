@@ -182,15 +182,19 @@ const HeroSection = () => {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             {[
-              { name: 'Prof. Nilesh Patil', role: 'Program Officer', avatar: 'NP', bg: 'from-blue-600 to-indigo-600' },
-              { name: 'Soham Kale', role: 'Student President', avatar: 'SK', bg: 'from-[#102167] to-[#3b4da8]' },
-              { name: 'Ananya Kulkarni', role: 'Vice President', avatar: 'AK', bg: 'from-emerald-500 to-teal-500' },
-              { name: 'Rahul Patil', role: 'Secretary', avatar: 'RP', bg: 'from-[#ef7041] to-orange-500' }
+              { name: 'Prof. Atul Ballal', role: 'NSS Chief Officer', avatar: 'AB', bg: 'from-blue-700 to-indigo-700', photo: null },
+              { name: 'Sahil Tikande', role: 'NSS Lead', avatar: 'ST', bg: 'from-[#102167] to-[#3b4da8]', photo: '/core leadership/sahil tikande.jpeg' },
+              { name: 'Prathamesh Veer', role: 'Operational Lead', avatar: 'PV', bg: 'from-emerald-500 to-teal-500', photo: '/core leadership/prathamesh.jpeg' },
+              { name: 'Rushikesh Tekale', role: 'Dadachi Shala Lead', avatar: 'RT', bg: 'from-[#ef7041] to-orange-500', photo: '/core leadership/rushikesh.jpeg' }
             ].map((m, idx) => (
               <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50/50 rounded-2xl border border-gray-100/40 text-left">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${m.bg} flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-sm`}>
-                  {m.avatar}
-                </div>
+                {m.photo ? (
+                  <img src={m.photo} alt={m.name} className="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-sm" />
+                ) : (
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${m.bg} flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-sm`}>
+                    {m.avatar}
+                  </div>
+                )}
                 <div className="overflow-hidden">
                   <p className="font-extrabold text-gray-800 text-xs truncate leading-none">{m.name}</p>
                   <p className="text-[9px] text-[#ef7041] font-bold mt-1.5 truncate uppercase tracking-wider leading-none">{m.role}</p>
