@@ -86,7 +86,7 @@ const MyAttendance = () => {
       {[
         { label: 'Events Attended', value: present, sub: `of ${total} total`, icon: HiOutlineCheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
         { label: 'Events Missed',   value: total - present, sub: 'Absent',       icon: HiOutlineXCircle,   color: 'text-red-500',     bg: 'bg-red-50'     },
-        { label: 'Attendance %',    value: `${pct}%`, sub: pct >= 75 ? 'Excellent!' : 'Needs Improvement', icon: HiOutlineCalendar, color: 'text-[#102167]', bg: 'bg-[#eef2ff]' },
+        { label: 'Attendance %',    value: `${pct}%`, sub: total === 0 ? 'No events yet' : (pct >= 75 ? 'Excellent!' : 'Needs Improvement'), icon: HiOutlineCalendar, color: 'text-[#102167]', bg: 'bg-[#eef2ff]' },
         { label: 'NSS Points',      value: totalPts,  sub: 'Total Earned',   icon: BsShieldCheck,      color: 'text-violet-600',  bg: 'bg-violet-50'  },
       ].map(c => {
         const IC = c.icon;
@@ -162,8 +162,8 @@ const MyAttendance = () => {
           </div>
         </div>
         <div className={`w-full py-3 rounded-xl text-xs font-bold text-center
-          ${pct >= 75 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-          {pct >= 75 ? '✓ Excellent! You are doing great.' : '⚠ Attendance below 75%.'}
+          ${total === 0 ? 'bg-gray-50 text-gray-400' : (pct >= 75 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700')}`}>
+          {total === 0 ? 'No events attended yet.' : (pct >= 75 ? '✓ Excellent! You are doing great.' : '⚠ Attendance below 75%.')}
         </div>
         <div className="w-full space-y-3 pt-1">
           <div className="flex items-center justify-between text-xs font-bold text-gray-500">

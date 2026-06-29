@@ -1,30 +1,69 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HiOutlineCalendar, HiOutlineLocationMarker, HiOutlineClock, HiOutlineSearch, HiOutlineFilter } from 'react-icons/hi';
 import { FiArrowRight, FiCheckCircle } from 'react-icons/fi';
-
-const allEvents = [
-  { id: 1, day: '28', month: 'JUN', title: 'Tree Plantation Drive', venue: 'Green Park, Pune', time: '09:00 AM', tag: 'Environment', tagColor: 'bg-emerald-50 text-emerald-700', status: 'upcoming', desc: 'Join us for a city-wide tree plantation drive to increase green cover and raise awareness about deforestation.' },
-  { id: 2, day: '05', month: 'JUL', title: 'Blood Donation Camp', venue: 'Civil Hospital, Pune', time: '10:00 AM', tag: 'Health', tagColor: 'bg-red-50 text-red-600', status: 'upcoming', desc: 'Donate blood and save lives. Every unit of blood can save up to three lives. Bring your ID proof.' },
-  { id: 3, day: '12', month: 'JUL', title: 'Swachhta Abhiyan', venue: 'Pune Municipal Area', time: '08:00 AM', tag: 'Sanitation', tagColor: 'bg-blue-50 text-blue-700', status: 'upcoming', desc: 'Mass cleanliness drive in collaboration with Pune Municipal Corporation across 10 wards.' },
-  { id: 4, day: '18', month: 'JUL', title: 'Rural Education Camp', venue: 'Wagholi Village, Pune', time: '07:30 AM', tag: 'Education', tagColor: 'bg-violet-50 text-violet-700', status: 'upcoming', desc: 'Teaching basic literacy and numeracy to underprivileged children in rural areas.' },
-  { id: 5, day: '15', month: 'JUN', title: 'Campus Clean-Up Drive', venue: 'Samarth College Campus', time: '09:00 AM', tag: 'Sanitation', tagColor: 'bg-blue-50 text-blue-700', status: 'completed', desc: 'Annual campus cleaning initiative. Successfully completed with 120+ volunteers.' },
-  { id: 6, day: '10', month: 'JUN', title: 'Covid Awareness Rally', venue: 'FC Road, Pune', time: '08:00 AM', tag: 'Health', tagColor: 'bg-red-50 text-red-600', status: 'completed', desc: 'Awareness rally about preventive health measures. Over 500 pamphlets distributed.' },
-];
+import { useAuth } from '../../context/AuthContext';
+import { fetchEvents, fetchStudentRegistrations, registerForEvent, unregisterFromEvent } from '../../services/eventsService';
 
 const StudentEvents = () => {
+  const { auth } = useAuth();
+  const [events, setEvents] = useState([]);
+  const [registered, setRegistered] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
-  const [registered, setRegistered] = useState([]);
 
-  const filtered = allEvents.filter(ev => {
-    const matchFilter = filter === 'all' || ev.status === filter;
-    const matchSearch = ev.title.toLowerCase().includes(search.toLowerCase()) || ev.venue.toLowerCase().includes(search.toLowerCase());
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const allEvents = await fetchEvents();
+        setEvents(allEvents);
+
+        if (auth?.id) {
+          const regs = await fetchStudentRegistrations(auth.id);
+          setRegistered(regs);
+        }
+      } catch (err) {
+        console.error('Failed to load events:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [auth]);
+
+  const filtered = events.filter(ev => {
+    const matchFilter = filter === 'all' || (ev.status || 'Upcoming').toLowerCase() === filter.toLowerCase();
+    const matchSearch = (ev.title || '').toLowerCase().includes(search.toLowerCase()) || (ev.venue || '').toLowerCase().includes(search.toLowerCase());
     return matchFilter && matchSearch;
   });
 
-  const toggleRegister = (id) => {
-    setRegistered(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const toggleRegister = async (eventId) => {
+    if (!auth?.id) return;
+    const isReg = registered.includes(eventId);
+    try {
+      if (isReg) {
+        await unregisterFromEvent(eventId, auth.id);
+        setRegistered(prev => prev.filter(id => id !== eventId));
+      } else {
+        await registerForEvent(eventId, auth.id);
+        setRegistered(prev => [...prev, eventId]);
+      }
+    } catch (err) {
+      alert('Registration failed: ' + err.message);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-[#102167] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm font-semibold text-gray-400">Loading events...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -36,7 +75,7 @@ const StudentEvents = () => {
         </div>
         <div className="flex items-center gap-2 text-sm font-bold text-[#102167] bg-[#eef2ff] px-4 py-2 rounded-xl">
           <HiOutlineCalendar size={16} />
-          {allEvents.filter(e => e.status === 'upcoming').length} Upcoming
+          {events.filter(e => (e.status || 'Upcoming').toLowerCase() === 'upcoming').length} Upcoming
         </div>
       </div>
 
@@ -67,18 +106,23 @@ const StudentEvents = () => {
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
         {filtered.map(ev => {
           const isReg = registered.includes(ev.id);
-          const isDone = ev.status === 'completed';
+          const isDone = (ev.status || 'Upcoming').toLowerCase() === 'completed';
+          const d = ev.date ? new Date(ev.date) : new Date();
+          const day = d.getDate().toString().padStart(2, '0');
+          const month = d.toLocaleString('default', { month: 'short' }).toUpperCase();
+          const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          
           return (
             <div key={ev.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col">
               {/* Card Header */}
               <div className={`p-5 flex items-center gap-4 ${isDone ? 'bg-gray-100' : 'bg-gradient-to-r from-[#102167] to-[#1a2f85]'}`}>
                 <div className="text-center flex-shrink-0">
-                  <p className={`text-3xl font-black leading-none ${isDone ? 'text-gray-500' : 'text-white'}`}>{ev.day}</p>
-                  <p className={`text-[10px] font-bold uppercase tracking-wider ${isDone ? 'text-gray-400' : 'text-[#ef7041]'}`}>{ev.month}</p>
+                  <p className={`text-3xl font-black leading-none ${isDone ? 'text-gray-500' : 'text-white'}`}>{day}</p>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider ${isDone ? 'text-gray-400' : 'text-[#ef7041]'}`}>{month}</p>
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${isDone ? 'bg-gray-200 text-gray-500' : 'bg-white/20 text-white'}`}>
-                    {ev.tag}
+                    {ev.tag || 'General'}
                   </span>
                   <h3 className={`font-extrabold mt-1.5 text-sm leading-tight ${isDone ? 'text-gray-600' : 'text-white'}`}>{ev.title}</h3>
                 </div>
@@ -87,16 +131,16 @@ const StudentEvents = () => {
 
               {/* Card Body */}
               <div className="p-5 flex flex-col flex-1 gap-3">
-                <p className="text-xs text-gray-500 leading-relaxed">{ev.desc}</p>
-                <div className="space-y-1.5">
+                <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">{ev.description || 'No description provided.'}</p>
+                <div className="space-y-1.5 mt-2">
                   <p className="text-xs text-gray-400 flex items-center gap-1.5 font-medium">
-                    <HiOutlineLocationMarker size={13} className="text-[#ef7041]" /> {ev.venue}
+                    <HiOutlineLocationMarker size={13} className="text-[#ef7041]" /> {ev.venue || 'TBA'}
                   </p>
                   <p className="text-xs text-gray-400 flex items-center gap-1.5 font-medium">
-                    <HiOutlineClock size={13} className="text-[#102167]" /> {ev.time}
+                    <HiOutlineClock size={13} className="text-[#102167]" /> {time}
                   </p>
                 </div>
-                <div className="mt-auto pt-2">
+                <div className="mt-auto pt-4">
                   {isDone ? (
                     <div className="w-full py-2.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-xl text-center">
                       ✓ Event Completed

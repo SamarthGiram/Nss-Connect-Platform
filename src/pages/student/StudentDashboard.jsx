@@ -191,8 +191,8 @@ const StudentDashboard = () => {
           iconBg="bg-gradient-to-br from-emerald-400 to-green-500"
           label="Attendance"
           value={`${attendance.pct}%`}
-          sub={attendance.pct >= 75 ? "Excellent!" : "Needs Improvement"}
-          subColor="text-emerald-500"
+          sub={attendance.total === 0 ? "No events yet" : (attendance.pct >= 75 ? "Excellent!" : "Needs Improvement")}
+          subColor={attendance.total === 0 ? "text-gray-400" : (attendance.pct >= 75 ? "text-emerald-500" : "text-amber-500")}
         />
         <StatCard
           icon={BsShieldCheck}
