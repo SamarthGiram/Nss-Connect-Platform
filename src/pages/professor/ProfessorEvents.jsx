@@ -146,55 +146,57 @@ const ProfessorEvents = () => {
 
       {/* Add Form */}
       {showForm && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border-2 border-[#102167]/20">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="font-extrabold text-gray-800">{editId ? 'Edit Event' : 'Create New Event'}</h3>
-            <button onClick={() => { setShowForm(false); setEditId(null); }} className="text-gray-400 hover:text-gray-600"><FiX size={18}/></button>
-          </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            {[
-              { label:'Event Title', key:'title', type:'text', placeholder:'Enter event title' },
-              { label:'Venue',       key:'venue', type:'text', placeholder:'Enter venue' },
-              { label:'Date',        key:'date',  type:'date', placeholder:'' },
-              { label:'Time',        key:'time',  type:'time', placeholder:'' },
-            ].map(f => (
-              <div key={f.key}>
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">{f.label}</label>
-                <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({...p, [f.key]: e.target.value}))}
-                  placeholder={f.placeholder}
-                  className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold text-gray-800 focus:border-[#102167] focus:ring-4 focus:ring-[#102167]/10 outline-none transition-all"/>
+        <div className="fixed inset-0 bg-black/45 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => { setShowForm(false); setEditId(null); }}>
+          <div className="bg-white rounded-3xl p-6 shadow-2xl border border-gray-100 max-w-2xl w-full animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-extrabold text-[#102167] text-lg">{editId ? 'Edit Event Details' : 'Create New Event'}</h3>
+              <button onClick={() => { setShowForm(false); setEditId(null); }} className="text-gray-400 hover:text-gray-600 border-none bg-transparent cursor-pointer"><FiX size={18}/></button>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              {[
+                { label:'Event Title', key:'title', type:'text', placeholder:'Enter event title' },
+                { label:'Venue',       key:'venue', type:'text', placeholder:'Enter venue' },
+                { label:'Date',        key:'date',  type:'date', placeholder:'' },
+                { label:'Time',        key:'time',  type:'time', placeholder:'' },
+              ].map(f => (
+                <div key={f.key}>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">{f.label}</label>
+                  <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({...p, [f.key]: e.target.value}))}
+                    placeholder={f.placeholder}
+                    className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold text-gray-800 focus:border-[#102167] focus:ring-4 focus:ring-[#102167]/10 outline-none transition-all"/>
+                </div>
+              ))}
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Category</label>
+                <select value={form.tag} onChange={e => setForm(p => ({...p, tag: e.target.value}))}
+                  className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold text-gray-800 focus:border-[#102167] outline-none transition-all">
+                  {['Sanitation','Health','Environment','Education','General'].map(t => <option key={t}>{t}</option>)}
+                </select>
               </div>
-            ))}
-            <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Category</label>
-              <select value={form.tag} onChange={e => setForm(p => ({...p, tag: e.target.value}))}
-                className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold text-gray-800 focus:border-[#102167] outline-none transition-all">
-                {['Sanitation','Health','Environment','Education','General'].map(t => <option key={t}>{t}</option>)}
-              </select>
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Status</label>
+                <select value={form.status} onChange={e => setForm(p => ({...p, status: e.target.value}))}
+                  className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold text-gray-800 focus:border-[#102167] outline-none transition-all">
+                  {['Active','Upcoming','Completed'].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Description</label>
+                <textarea rows={2} value={form.description} onChange={e => setForm(p => ({...p, description: e.target.value}))}
+                  placeholder="Event description..."
+                  className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-medium text-gray-800 focus:border-[#102167] outline-none transition-all resize-none"/>
+              </div>
             </div>
-            <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Status</label>
-              <select value={form.status} onChange={e => setForm(p => ({...p, status: e.target.value}))}
-                className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-semibold text-gray-800 focus:border-[#102167] outline-none transition-all">
-                {['Active','Upcoming','Completed'].map(s => <option key={s}>{s}</option>)}
-              </select>
+            <div className="flex gap-3 mt-4">
+              <button onClick={handleSave} disabled={saving}
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#102167] text-white text-sm font-bold rounded-xl hover:bg-[#1a2f85] transition-all shadow-md disabled:opacity-70 border-none cursor-pointer">
+                {saving ? 'Saving...' : (editId ? 'Save Changes' : 'Add Event')}
+              </button>
+              <button onClick={() => { setShowForm(false); setEditId(null); }}
+                className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-600 text-sm font-bold rounded-xl hover:bg-gray-200 transition-all border-none cursor-pointer">
+                Cancel
+              </button>
             </div>
-            <div className="md:col-span-2">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Description</label>
-              <textarea rows={2} value={form.description} onChange={e => setForm(p => ({...p, description: e.target.value}))}
-                placeholder="Event description..."
-                className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-100 text-sm font-medium text-gray-800 focus:border-[#102167] outline-none transition-all resize-none"/>
-            </div>
-          </div>
-          <div className="flex gap-3 mt-4">
-            <button onClick={handleSave} disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#102167] text-white text-sm font-bold rounded-xl hover:bg-[#1a2f85] transition-all shadow-md disabled:opacity-70">
-              {saving ? 'Saving...' : (editId ? 'Save Changes' : 'Add Event')}
-            </button>
-            <button onClick={() => { setShowForm(false); setEditId(null); }}
-              className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-600 text-sm font-bold rounded-xl hover:bg-gray-200 transition-all">
-              Cancel
-            </button>
           </div>
         </div>
       )}
@@ -223,10 +225,10 @@ const ProfessorEvents = () => {
                   <h3 className={`font-extrabold text-sm leading-tight ${ev.status === 'Completed' ? 'text-gray-600' : 'text-white'} truncate pr-2`}>{ev.title}</h3>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={(e) => { e.stopPropagation(); openEdit(ev); }} className={`p-2 rounded-xl transition-all ${ev.status === 'Completed' ? 'text-gray-400 hover:bg-gray-200 hover:text-[#102167]' : 'text-white/70 hover:bg-white/10 hover:text-white'}`} title="Edit Event">
+                  <button onClick={(e) => { e.stopPropagation(); openEdit(ev); }} className={`p-2 rounded-xl transition-all bg-transparent border-none shadow-none hover:shadow-none ${ev.status === 'Completed' ? 'text-gray-400 hover:bg-gray-200 hover:text-[#102167]' : 'text-white/70 hover:bg-white/10 hover:text-white'}`} title="Edit Event">
                     <HiOutlinePencil size={18}/>
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); handleDelete(ev.id); }} className={`p-2 rounded-xl transition-all ${ev.status === 'Completed' ? 'text-gray-400 hover:bg-gray-200 hover:text-red-500' : 'text-white/70 hover:bg-white/10 hover:text-red-400'}`} title="Delete Event">
+                  <button onClick={(e) => { e.stopPropagation(); handleDelete(ev.id); }} className={`p-2 rounded-xl transition-all bg-transparent border-none shadow-none hover:shadow-none ${ev.status === 'Completed' ? 'text-gray-400 hover:bg-gray-200 hover:text-red-500' : 'text-white/70 hover:bg-white/10 hover:text-red-400'}`} title="Delete Event">
                     <HiOutlineTrash size={18}/>
                   </button>
                 </div>

@@ -3,12 +3,13 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import nssLogo from '../assets/nss.png';
+import { parseProfile } from '../utils/avatarParser';
 import {
   HiOutlineViewGrid, HiOutlineCalendar, HiOutlineUserGroup,
   HiOutlineClipboardCheck, HiOutlineMenuAlt2, HiOutlineX,
-  HiOutlineSpeakerphone
+  HiOutlineSpeakerphone, HiOutlineUser
 } from 'react-icons/hi';
-import { FiBell, FiChevronDown, FiShield } from 'react-icons/fi';
+import { FiBell, FiChevronDown, FiShield, FiLogOut, FiUser } from 'react-icons/fi';
 
 const adminLinks = [
   { name: 'Dashboard',            path: '/admin/dashboard',      icon: HiOutlineViewGrid,       badge: null },
@@ -17,6 +18,7 @@ const adminLinks = [
   { name: 'Announcements',        path: '/admin/announcements',  icon: HiOutlineSpeakerphone,   badge: null },
   { name: 'Manage Users',         path: '/admin/users',          icon: HiOutlineUserGroup,       badge: null },
   { name: 'Student Approvals',    path: '/admin/approvals',      icon: HiOutlineClipboardCheck, badge: 'pending' },
+  { name: 'My Profile',           path: '/admin/profile',        icon: HiOutlineUser,           badge: null },
 ];
 
 const SidebarContent = ({ onClose, pendingCount }) => (
@@ -117,7 +119,39 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
+  const [avatarTheme, setAvatarTheme] = useState(() => {
+    const parsed = parseProfile(auth);
+    return parsed?.avatar_theme || localStorage.getItem(`avatar_theme_${auth?.id}`) || 'from-[#ef7041] to-[#f48b62]';
+  });
+
+  const [avatarIcon, setAvatarIcon] = useState(() => {
+    const parsed = parseProfile(auth);
+    return parsed?.avatar_icon || localStorage.getItem(`avatar_icon_${auth?.id}`) || '';
+  });
+
+  const [avatarImg, setAvatarImg] = useState(() => {
+    const parsed = parseProfile(auth);
+    return parsed?.avatar_img || localStorage.getItem(`avatar_img_${auth?.id}`) || '';
+  });
+
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  useEffect(() => {
+    const handleThemeUpdate = () => {
+      const parsed = parseProfile(auth);
+      const storedTheme = parsed?.avatar_theme || localStorage.getItem(`avatar_theme_${auth?.id}`);
+      if (storedTheme) setAvatarTheme(storedTheme);
+      const storedIcon = parsed?.avatar_icon || localStorage.getItem(`avatar_icon_${auth?.id}`);
+      setAvatarIcon(storedIcon || '');
+      const storedImg = parsed?.avatar_img || localStorage.getItem(`avatar_img_${auth?.id}`);
+      setAvatarImg(storedImg || '');
+    };
+    window.addEventListener('avatar-theme-updated', handleThemeUpdate);
+    handleThemeUpdate();
+    return () => window.removeEventListener('avatar-theme-updated', handleThemeUpdate);
+  }, [auth]);
 
   // Fetch pending count on mount and poll every 60 seconds
   useEffect(() => {
@@ -168,25 +202,130 @@ const AdminLayout = () => {
           </div>
           <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
             {/* Bell with pending badge */}
-            <button className="relative p-2 md:p-2.5 rounded-xl bg-white border border-gray-200 hover:border-[#ef7041]/40 hover:bg-orange-50 transition-all duration-200 shadow-sm">
-              <FiBell size={18} className="text-gray-400" />
-              {pendingCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-amber-500 rounded-full border-2 border-white text-white text-[9px] font-black flex items-center justify-center px-1">
-                  {pendingCount}
-                </span>
+            <div className="relative">
+              <button onClick={() => setBellOpen(!bellOpen)}
+                className="relative p-2 md:p-2.5 rounded-xl bg-white border border-gray-200 hover:border-[#ef7041]/40 hover:bg-orange-50 transition-all duration-200 shadow-sm flex-shrink-0 bg-transparent">
+                <FiBell size={18} className="text-gray-400" />
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-amber-500 rounded-full border-2 border-white text-white text-[9px] font-black flex items-center justify-center px-1">
+                    {pendingCount}
+                  </span>
+                )}
+              </button>
+
+              {bellOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setBellOpen(false)} />
+                  <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-xl py-3 z-50 animate-fade-in origin-top-right">
+                    <div className="px-4 pb-2 border-b border-gray-100 flex items-center justify-between">
+                      <span className="text-xs font-extrabold text-gray-800">Notifications</span>
+                      {pendingCount > 0 && <span className="w-2 h-2 bg-amber-500 rounded-full"></span>}
+                    </div>
+                    <div className="py-2 px-2 max-h-60 overflow-y-auto">
+                      {pendingCount > 0 ? (
+                        <button
+                          onClick={() => {
+                            setBellOpen(false);
+                            navigate('/admin/approvals');
+                          }}
+                          className="w-full text-left p-2.5 rounded-xl hover:bg-orange-50 transition-colors flex items-start gap-2.5 bg-transparent border-none shadow-none text-gray-700"
+                        >
+                          <div className="w-7 h-7 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <FiBell size={14} />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-gray-700 leading-tight">Student Approvals Pending</p>
+                            <p className="text-[10px] text-gray-400 mt-0.5">{pendingCount} student accounts are waiting for verification.</p>
+                          </div>
+                        </button>
+                      ) : (
+                        <div className="text-center py-6 text-gray-400">
+                          <FiBell size={24} className="mx-auto text-gray-300 mb-2" />
+                          <p className="text-xs font-medium">All caught up!</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
               )}
-            </button>
-            <button onClick={handleLogout}
-              className="flex items-center gap-2 px-2 md:px-4 py-2 rounded-xl bg-white border border-gray-200 hover:border-[#ef7041]/40 hover:bg-orange-50 transition-all duration-200 shadow-sm">
-              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-[#ef7041] to-[#f48b62] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                {auth?.name?.[0] || 'A'}
-              </div>
-              <div className="text-left hidden sm:block">
-                <span className="block text-sm font-bold text-gray-700 leading-tight">{auth?.name || 'Admin'}</span>
-                <span className="block text-[10px] text-[#ef7041] font-bold leading-tight">Administrator</span>
-              </div>
-              <FiChevronDown size={13} className="text-gray-400 hidden sm:block" />
-            </button>
+            </div>
+
+            {/* Profile Dropdown */}
+            <div className="relative">
+              <button onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 px-2 md:px-4 py-2 rounded-xl bg-white border border-gray-200 hover:border-[#ef7041]/40 hover:bg-orange-50 transition-all duration-200 shadow-sm bg-transparent">
+                <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br ${avatarTheme} flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden`}>
+                  {avatarImg ? (
+                    <img src={avatarImg} alt="User Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    avatarIcon || auth?.name?.[0] || 'A'
+                  )}
+                </div>
+                <div className="text-left hidden sm:block">
+                  <span className="block text-sm font-bold text-gray-700 leading-tight">{auth?.name || 'Admin'}</span>
+                  <span className="block text-[10px] text-[#ef7041] font-bold leading-tight">Administrator</span>
+                </div>
+                <FiChevronDown size={13} className={`text-gray-400 hidden sm:block transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {dropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                  <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 animate-fade-in origin-top-right">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-xs font-extrabold text-gray-800 truncate">{auth?.name || 'Admin'}</p>
+                      <p className="text-[9px] text-[#ef7041] font-bold uppercase tracking-wider mt-0.5">Administrator</p>
+                    </div>
+                    
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          navigate('/admin/profile');
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:text-[#ef7041] transition-colors flex items-center gap-2.5 bg-transparent border-none shadow-none hover:shadow-none"
+                      >
+                        <FiUser size={15} className="text-gray-400" />
+                        <span className="flex-1 text-left">My Profile</span>
+                      </button>
+
+                      {adminLinks.map((link) => {
+                        const Icon = link.icon;
+                        const showBadge = link.badge === 'pending' && pendingCount > 0;
+                        return (
+                          <button
+                            key={link.name}
+                            onClick={() => {
+                              setDropdownOpen(false);
+                              navigate(link.path);
+                            }}
+                            className="w-full text-left px-4 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:text-[#ef7041] transition-colors flex items-center gap-2.5 bg-transparent border-none shadow-none hover:shadow-none"
+                          >
+                            <Icon size={15} className="text-gray-400" />
+                            <span className="flex-1 text-left">{link.name}</span>
+                            {showBadge && (
+                              <span className="min-w-[16px] h-4 bg-amber-500 text-white text-[8px] font-black rounded-full flex items-center justify-center px-1">
+                                {pendingCount}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    <div className="border-t border-gray-100 my-1"></div>
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2.5 bg-transparent border-none shadow-none hover:shadow-none"
+                    >
+                      <FiLogOut size={15} />
+                      Logout
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </header>
 

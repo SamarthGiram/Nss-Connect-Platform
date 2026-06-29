@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { fetchEvents } from '../../services/eventsService';
 import { fetchStudentAttendanceSummary, fetchStudentAttendance } from '../../services/attendanceService';
@@ -51,8 +52,8 @@ const CircularProgress = ({ percent }) => {
 };
 
 // ─── Stat Card ────────────────────────────────────────────────────
-const StatCard = ({ icon: Icon, iconBg, value, label, sub, subColor }) => (
-  <div className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+const StatCard = ({ icon: Icon, iconBg, value, label, sub, subColor, onClick }) => (
+  <div onClick={onClick} className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md ${iconBg}`}>
       <Icon size={26} className="text-white" />
     </div>
@@ -65,8 +66,8 @@ const StatCard = ({ icon: Icon, iconBg, value, label, sub, subColor }) => (
 );
 
 // ─── Event Row ────────────────────────────────────────────────────
-const EventRow = ({ day, month, title, venue, time }) => (
-  <div className="flex items-center gap-4 py-3.5 border-b border-gray-50 last:border-0">
+const EventRow = ({ day, month, title, venue, time, onClick }) => (
+  <div onClick={onClick} className="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0 cursor-pointer hover:bg-gray-50/70 px-2 rounded-xl transition-all">
     <div className="w-12 text-center flex-shrink-0">
       <p className="text-xl font-extrabold text-gray-800 leading-none">{day}</p>
       <p className="text-[11px] font-bold text-[#ef7041] uppercase tracking-wider">{month}</p>
@@ -85,8 +86,8 @@ const EventRow = ({ day, month, title, venue, time }) => (
 );
 
 // ─── Activity Row ─────────────────────────────────────────────────
-const ActivityRow = ({ icon: Icon, iconColor, iconBg, text, time }) => (
-  <div className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
+const ActivityRow = ({ icon: Icon, iconColor, iconBg, text, time, onClick }) => (
+  <div onClick={onClick} className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0 cursor-pointer hover:bg-gray-50/70 px-2 rounded-xl transition-all">
     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg}`}>
       <Icon size={15} className={iconColor} />
     </div>
@@ -96,8 +97,8 @@ const ActivityRow = ({ icon: Icon, iconColor, iconBg, text, time }) => (
 );
 
 // ─── Quick Link Button ────────────────────────────────────────────
-const QuickLink = ({ icon: Icon, label }) => (
-  <button className="flex items-center gap-2.5 px-4 py-3.5 bg-white rounded-xl border border-gray-100 hover:border-[#102167]/30 hover:bg-[#f5f7ff] transition-all duration-200 w-full shadow-sm hover:shadow-md group">
+const QuickLink = ({ icon: Icon, label, onClick }) => (
+  <button onClick={onClick} className="flex items-center gap-2.5 px-4 py-3.5 bg-white rounded-xl border border-gray-100 hover:border-[#102167]/30 hover:bg-[#f5f7ff] transition-all duration-200 w-full shadow-sm hover:shadow-md group bg-transparent border-none">
     <div className="w-8 h-8 bg-[#eef2ff] rounded-lg flex items-center justify-center group-hover:bg-[#102167] transition-colors duration-200">
       <Icon size={16} className="text-[#102167] group-hover:text-white transition-colors duration-200" />
     </div>
@@ -108,6 +109,7 @@ const QuickLink = ({ icon: Icon, label }) => (
 // ─── Main Dashboard ───────────────────────────────────────────────
 const StudentDashboard = () => {
   const { auth } = useAuth();
+  const navigate = useNavigate();
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [totalEvents, setTotalEvents] = useState(0);
   const [attendance, setAttendance] = useState({ total: 0, present: 0, absent: 0, pct: 0 });
@@ -177,6 +179,7 @@ const StudentDashboard = () => {
           value={totalEvents}
           sub="This Semester"
           subColor="text-gray-400"
+          onClick={() => navigate('/student/events')}
         />
         <StatCard
           icon={HiOutlineCalendar}
@@ -185,6 +188,7 @@ const StudentDashboard = () => {
           value={attendance.present}
           sub="Keep Going!"
           subColor="text-[#ef7041]"
+          onClick={() => navigate('/student/events')}
         />
         <StatCard
           icon={HiOutlineCheckCircle}
@@ -193,6 +197,7 @@ const StudentDashboard = () => {
           value={`${attendance.pct}%`}
           sub={attendance.total === 0 ? "No events yet" : (attendance.pct >= 75 ? "Excellent!" : "Needs Improvement")}
           subColor={attendance.total === 0 ? "text-gray-400" : (attendance.pct >= 75 ? "text-emerald-500" : "text-amber-500")}
+          onClick={() => navigate('/student/profile')}
         />
         <StatCard
           icon={BsShieldCheck}
@@ -201,6 +206,7 @@ const StudentDashboard = () => {
           value={attendance.present * 10}
           sub="Great Work!"
           subColor="text-violet-500"
+          onClick={() => navigate('/student/profile')}
         />
       </div>
 
@@ -213,20 +219,22 @@ const StudentDashboard = () => {
               <HiOutlineCalendar size={18} className="text-[#102167]" />
               Upcoming Events
             </h3>
-            <button className="text-[11px] font-bold text-[#102167] bg-[#eef2ff] px-3 py-1.5 rounded-lg hover:bg-[#102167] hover:text-white transition-all duration-200">
+            <button onClick={() => navigate('/student/events')}
+              className="text-[11px] font-bold text-[#102167] bg-[#eef2ff] px-3 py-1.5 rounded-lg hover:bg-[#102167] hover:text-white transition-all duration-200 border-none bg-transparent">
               View All
             </button>
           </div>
           <div>
             {upcomingEvents.length > 0 ? (
               upcomingEvents.map((ev, i) => (
-                <EventRow key={i} {...ev} />
+                <EventRow key={i} {...ev} onClick={() => navigate('/student/events')} />
               ))
             ) : (
               <p className="text-sm text-gray-500 py-4">No upcoming events scheduled.</p>
             )}
           </div>
-          <button className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#102167] bg-[#eef2ff] px-4 py-2 rounded-xl hover:bg-[#102167] hover:text-white transition-all duration-200 group">
+          <button onClick={() => navigate('/student/events')}
+            className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#102167] bg-[#eef2ff] px-4 py-2 rounded-xl hover:bg-[#102167] hover:text-white transition-all duration-200 group border-none bg-transparent">
             View All Events
             <FiArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform duration-200" />
           </button>
@@ -277,9 +285,10 @@ const StudentDashboard = () => {
             </h3>
           </div>
           {recentActivity.map((act, i) => (
-            <ActivityRow key={i} {...act} />
+            <ActivityRow key={i} {...act} onClick={() => navigate('/student/profile')} />
           ))}
-          <button className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#ef7041] bg-orange-50 px-4 py-2 rounded-xl hover:bg-[#ef7041] hover:text-white transition-all duration-200 group">
+          <button onClick={() => navigate('/student/profile')}
+            className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#ef7041] bg-orange-50 px-4 py-2 rounded-xl hover:bg-[#ef7041] hover:text-white transition-all duration-200 group border-none bg-transparent">
             View All Activity
             <FiArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform duration-200" />
           </button>
@@ -294,10 +303,10 @@ const StudentDashboard = () => {
             Quick Links
           </h3>
           <div className="grid grid-cols-2 gap-3">
-            <QuickLink icon={HiOutlineExternalLink} label="NSS Guidelines" />
-            <QuickLink icon={HiOutlineDownload} label="Downloads" />
-            <QuickLink icon={HiOutlinePhotograph} label="Photo Gallery" />
-            <QuickLink icon={HiOutlinePhone} label="Contact Coordinator" />
+            <QuickLink icon={HiOutlineExternalLink} label="NSS Guidelines" onClick={() => window.open('https://nss.gov.in/', '_blank')} />
+            <QuickLink icon={HiOutlineDownload} label="Downloads" onClick={() => alert('NSS Volunteer Handbook PDF download started!')} />
+            <QuickLink icon={HiOutlinePhotograph} label="Photo Gallery" onClick={() => navigate('/student/events')} />
+            <QuickLink icon={QuickLink && HiOutlinePhone} label="Contact Coordinator" onClick={() => alert('NSS Coordinator Contact:\nEmail: coordinator@nss-college.edu\nPhone: +91 98765 43210')} />
           </div>
         </div>
       </div>

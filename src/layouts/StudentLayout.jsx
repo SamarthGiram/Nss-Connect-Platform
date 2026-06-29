@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import nssLogo from '../assets/nss.png';
 import { HiOutlineViewGrid, HiOutlineCalendar, HiOutlineClipboardCheck, HiOutlineUser, HiOutlineMenuAlt2, HiOutlineX, HiOutlineSpeakerphone } from 'react-icons/hi';
-import { FiBell, FiChevronDown } from 'react-icons/fi';
+import { parseProfile } from '../utils/avatarParser';
+import { FiBell, FiChevronDown, FiLogOut } from 'react-icons/fi';
 
 const studentLinks = [
   { name: 'Dashboard',       path: '/student/dashboard',      icon: HiOutlineViewGrid       },
@@ -96,8 +97,39 @@ const StudentLayout = () => {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
+  const [avatarTheme, setAvatarTheme] = useState(() => {
+    const parsed = parseProfile(auth);
+    return parsed?.avatar_theme || localStorage.getItem(`avatar_theme_${auth?.id}`) || 'from-[#102167] to-[#3b4da8]';
+  });
+
+  const [avatarIcon, setAvatarIcon] = useState(() => {
+    const parsed = parseProfile(auth);
+    return parsed?.avatar_icon || localStorage.getItem(`avatar_icon_${auth?.id}`) || '';
+  });
+
+  const [avatarImg, setAvatarImg] = useState(() => {
+    const parsed = parseProfile(auth);
+    return parsed?.avatar_img || localStorage.getItem(`avatar_img_${auth?.id}`) || '';
+  });
 
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  useEffect(() => {
+    const handleThemeUpdate = () => {
+      const parsed = parseProfile(auth);
+      const storedTheme = parsed?.avatar_theme || localStorage.getItem(`avatar_theme_${auth?.id}`);
+      if (storedTheme) setAvatarTheme(storedTheme);
+      const storedIcon = parsed?.avatar_icon || localStorage.getItem(`avatar_icon_${auth?.id}`);
+      setAvatarIcon(storedIcon || '');
+      const storedImg = parsed?.avatar_img || localStorage.getItem(`avatar_img_${auth?.id}`);
+      setAvatarImg(storedImg || '');
+    };
+    window.addEventListener('avatar-theme-updated', handleThemeUpdate);
+    handleThemeUpdate();
+    return () => window.removeEventListener('avatar-theme-updated', handleThemeUpdate);
+  }, [auth]);
 
   return (
     <div className="flex h-screen bg-[#f0f4ff] font-sans overflow-hidden">
@@ -138,22 +170,102 @@ const StudentLayout = () => {
 
           <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
             {/* Bell */}
-            <button className="relative p-2 md:p-2.5 rounded-xl bg-white border border-gray-200 hover:border-[#102167]/30 hover:bg-[#f5f7ff] transition-all shadow-sm">
-              <FiBell size={18} className="text-gray-400" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#ef7041] rounded-full border border-white"></span>
-            </button>
+            <div className="relative">
+              <button onClick={() => setBellOpen(!bellOpen)}
+                className="relative p-2 md:p-2.5 rounded-xl bg-white border border-gray-200 hover:border-[#102167]/30 hover:bg-[#f5f7ff] transition-all shadow-sm bg-transparent flex-shrink-0">
+                <FiBell size={18} className="text-gray-400" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#ef7041] rounded-full border border-white"></span>
+              </button>
+
+              {bellOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setBellOpen(false)} />
+                  <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-xl py-3 z-50 animate-fade-in origin-top-right">
+                    <div className="px-4 pb-2 border-b border-gray-100 flex items-center justify-between">
+                      <span className="text-xs font-extrabold text-gray-800">Notifications</span>
+                      <span className="w-2 h-2 bg-[#ef7041] rounded-full"></span>
+                    </div>
+                    <div className="py-2 px-2 max-h-60 overflow-y-auto">
+                      <button
+                        onClick={() => {
+                          setBellOpen(false);
+                          navigate('/student/announcements');
+                        }}
+                        className="w-full text-left p-2.5 rounded-xl hover:bg-[#f5f7ff] transition-colors flex items-start gap-2.5 bg-transparent border-none shadow-none text-gray-700 font-medium"
+                      >
+                        <div className="w-7 h-7 bg-orange-100 text-[#ef7041] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <FiBell size={14} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-gray-700 leading-tight">Welcome to NSS Connect!</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">Go to the Announcements tab to view latest updates and alerts.</p>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
             {/* User */}
-            <button onClick={handleLogout}
-              className="flex items-center gap-2 px-2 md:px-4 py-2 rounded-xl bg-white border border-gray-200 hover:border-[#102167]/30 hover:bg-[#f5f7ff] transition-all duration-200 shadow-sm">
-              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-[#102167] to-[#3b4da8] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                {auth?.name?.[0] || 'S'}
-              </div>
-              <div className="text-left hidden sm:block">
-                <span className="block text-sm font-bold text-gray-700 leading-tight">{auth?.name || 'Student'}</span>
-                <span className="block text-[10px] text-[#102167] font-bold leading-tight">NSS Volunteer</span>
-              </div>
-              <FiChevronDown size={13} className="text-gray-400 hidden sm:block" />
-            </button>
+            <div className="relative">
+              <button onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 px-2 md:px-4 py-2 rounded-xl bg-white border border-gray-200 hover:border-[#102167]/30 hover:bg-[#f5f7ff] transition-all duration-200 shadow-sm bg-transparent">
+                <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br ${avatarTheme} flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden`}>
+                  {avatarImg ? (
+                    <img src={avatarImg} alt="User Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    avatarIcon || auth?.name?.[0] || 'S'
+                  )}
+                </div>
+                <div className="text-left hidden sm:block">
+                  <span className="block text-sm font-bold text-gray-700 leading-tight">{auth?.name || 'Student'}</span>
+                  <span className="block text-[10px] text-[#102167] font-bold leading-tight">NSS Volunteer</span>
+                </div>
+                <FiChevronDown size={13} className={`text-gray-400 hidden sm:block transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {dropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                  <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 animate-fade-in origin-top-right">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-xs font-extrabold text-gray-800 truncate">{auth?.name || 'Student'}</p>
+                      <p className="text-[9px] text-[#102167] font-bold uppercase tracking-wider mt-0.5">NSS Volunteer</p>
+                    </div>
+                    
+                    <div className="py-1">
+                      {studentLinks.map((link) => {
+                        const Icon = link.icon;
+                        return (
+                          <button
+                            key={link.name}
+                            onClick={() => {
+                              setDropdownOpen(false);
+                              navigate(link.path);
+                            }}
+                            className="w-full text-left px-4 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:text-[#102167] transition-colors flex items-center gap-2.5 bg-transparent border-none shadow-none hover:shadow-none"
+                          >
+                            <Icon size={15} className="text-gray-400" />
+                            <span className="text-left">{link.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    <div className="border-t border-gray-100 my-1"></div>
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2.5 bg-transparent border-none shadow-none hover:shadow-none"
+                    >
+                      <FiLogOut size={15} />
+                      Logout
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </header>
 

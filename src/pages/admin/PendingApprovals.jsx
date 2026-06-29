@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchAllUsers, updateUserProfile } from '../../services/usersService';
+import { parseProfile } from '../../utils/avatarParser';
 import {
   HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineClock,
   HiOutlineSearch, HiOutlineRefresh, HiOutlineUserGroup,
@@ -248,11 +249,12 @@ const PendingApprovals = () => {
                 </p>
               </div>
             ) : list.map((user, idx) => {
-              const isSelected = selected?.id === user.id;
-              const isPending  = user.status === 'pending';
-              const color      = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+              const parsed = parseProfile(user);
+              const isSelected = selected?.id === parsed.id;
+              const isPending  = parsed.status === 'pending';
+              const color      = parsed.avatar_theme || AVATAR_COLORS[idx % AVATAR_COLORS.length];
               return (
-                <div key={user.id}
+                <div key={parsed.id}
                   onClick={() => setSelected(isSelected ? null : user)}
                   className={`bg-white rounded-2xl p-4 shadow-sm border-2 transition-all duration-200 cursor-pointer
                     ${isSelected
@@ -263,40 +265,44 @@ const PendingApprovals = () => {
 
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
-                    <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                      <span className="text-white font-extrabold text-sm">{initials(user.name)}</span>
+                    <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden`}>
+                      {parsed.avatar_img ? (
+                        <img src={parsed.avatar_img} alt={parsed.name} className="w-full h-full object-cover" />
+                      ) : (
+                        parsed.avatar_icon || <span className="text-white font-extrabold text-sm">{initials(parsed.name)}</span>
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       {/* Top row */}
                       <div className="flex items-start justify-between gap-2 flex-wrap">
                         <div>
-                          <p className="text-sm font-extrabold text-gray-800">{user.name}</p>
-                          <p className="text-xs text-gray-400 font-medium mt-0.5 truncate">{user.email}</p>
+                          <p className="text-sm font-extrabold text-gray-800">{parsed.name}</p>
+                          <p className="text-xs text-gray-400 font-medium mt-0.5 truncate">{parsed.email}</p>
                         </div>
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${STATUS_PILL[user.status]}`}>
-                          {STATUS_LABEL[user.status]}
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${STATUS_PILL[parsed.status]}`}>
+                          {STATUS_LABEL[parsed.status]}
                         </span>
                       </div>
 
                       {/* Meta row */}
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
-                        {user.roll_number && (
+                        {parsed.roll_number && (
                           <span className="text-[11px] text-gray-500 font-semibold flex items-center gap-1">
-                            <HiOutlineAcademicCap size={12}/> {user.roll_number}
+                            <HiOutlineAcademicCap size={12}/> {parsed.roll_number}
                           </span>
                         )}
-                        {user.department && (
-                          <span className="text-[11px] text-gray-500 font-semibold">{user.department}</span>
+                        {parsed.department && (
+                          <span className="text-[11px] text-gray-500 font-semibold">{parsed.department}</span>
                         )}
-                        {user.year && (
-                          <span className="text-[11px] text-gray-500 font-semibold">{user.year}</span>
+                        {parsed.year && (
+                          <span className="text-[11px] text-gray-500 font-semibold">{parsed.year}</span>
                         )}
-                        {user.group && (
-                          <span className="text-[11px] text-gray-500 font-semibold">{user.group}</span>
+                        {parsed.group && (
+                          <span className="text-[11px] text-gray-500 font-semibold">{parsed.group}</span>
                         )}
                         <span className="text-[11px] text-gray-400 font-medium flex items-center gap-1 ml-auto">
-                          <HiOutlineCalendar size={11}/> {fmtDate(user.created_at)}
+                          <HiOutlineCalendar size={11}/> {fmtDate(parsed.created_at)}
                         </span>
                       </div>
 
@@ -304,14 +310,14 @@ const PendingApprovals = () => {
                       {isPending && (
                         <div className="flex gap-2 mt-3" onClick={e => e.stopPropagation()}>
                           <button
-                            onClick={() => handleApprove(user.id)}
-                            disabled={actionId === user.id}
+                            onClick={() => handleApprove(parsed.id)}
+                            disabled={actionId === parsed.id}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-50 text-emerald-700 text-xs font-extrabold rounded-xl hover:bg-emerald-500 hover:text-white transition-all border border-emerald-200 disabled:opacity-60">
                             <FiCheck size={13}/> Approve
                           </button>
                           <button
-                            onClick={() => handleReject(user.id)}
-                            disabled={actionId === user.id}
+                            onClick={() => handleReject(parsed.id)}
+                            disabled={actionId === parsed.id}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-red-50 text-red-600 text-xs font-extrabold rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-200 disabled:opacity-60">
                             <FiX size={13}/> Reject
                           </button>
@@ -335,37 +341,44 @@ const PendingApprovals = () => {
 
         {/* ── Right column: detail panel ── */}
         <div className="xl:col-span-2">
-          {selected ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 sticky top-0 overflow-hidden">
-              {/* Profile header */}
-              <div className="bg-gradient-to-br from-[#0b1a52] via-[#102167] to-[#1a3490] p-6">
-                <div className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${AVATAR_COLORS[all.indexOf(selected) % AVATAR_COLORS.length]} flex items-center justify-center mx-auto mb-3 shadow-xl`}>
-                  <span className="text-white font-black text-2xl">{initials(selected.name)}</span>
-                </div>
-                <h3 className="text-white font-extrabold text-base text-center">{selected.name}</h3>
-                <p className="text-blue-200 text-xs font-medium text-center mt-0.5">{selected.email}</p>
-                <div className="flex justify-center mt-3">
-                  <span className={`text-[11px] font-extrabold px-3 py-1.5 rounded-full ${STATUS_PILL[selected.status]}`}>
-                    {STATUS_LABEL[selected.status]}
-                  </span>
-                </div>
-              </div>
-
-              {/* Detail fields */}
-              <div className="p-5 space-y-2">
-                {[
-                  { label: '🎓 Roll Number',  value: selected.roll_number || '—' },
-                  { label: '🏛  Department',   value: selected.department  || '—' },
-                  { label: '📅 Year',          value: selected.year        || '—' },
-                  { label: '👥 Group',         value: selected.group       || '—' },
-                  { label: '📞 Phone',         value: selected.phone       || '—' },
-                  { label: '📆 Applied On',    value: fmtDate(selected.created_at) },
-                ].map(r => (
-                  <div key={r.label} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-2.5">
-                    <p className="text-[11px] text-gray-400 font-bold">{r.label}</p>
-                    <p className="text-xs font-bold text-gray-700 text-right">{r.value}</p>
+          {selected ? (() => {
+            const parsedSelected = parseProfile(selected);
+            const selectedColor = parsedSelected.avatar_theme || AVATAR_COLORS[all.indexOf(selected) % AVATAR_COLORS.length];
+            return (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 sticky top-0 overflow-hidden">
+                {/* Profile header */}
+                <div className="bg-gradient-to-br from-[#0b1a52] via-[#102167] to-[#1a3490] p-6">
+                  <div className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${selectedColor} flex items-center justify-center mx-auto mb-3 shadow-xl overflow-hidden`}>
+                    {parsedSelected.avatar_img ? (
+                      <img src={parsedSelected.avatar_img} alt={parsedSelected.name} className="w-full h-full object-cover" />
+                    ) : (
+                      parsedSelected.avatar_icon || <span className="text-white font-black text-2xl">{initials(parsedSelected.name)}</span>
+                    )}
                   </div>
-                ))}
+                  <h3 className="text-white font-extrabold text-base text-center">{parsedSelected.name}</h3>
+                  <p className="text-blue-200 text-xs font-medium text-center mt-0.5">{parsedSelected.email}</p>
+                  <div className="flex justify-center mt-3">
+                    <span className={`text-[11px] font-extrabold px-3 py-1.5 rounded-full ${STATUS_PILL[parsedSelected.status]}`}>
+                      {STATUS_LABEL[parsedSelected.status]}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Detail fields */}
+                <div className="p-5 space-y-2">
+                  {[
+                    { label: '🎓 Roll Number',  value: parsedSelected.roll_number || '—' },
+                    { label: '🏛  Department',   value: parsedSelected.department  || '—' },
+                    { label: '📅 Year',          value: parsedSelected.year        || '—' },
+                    { label: '👥 Group',         value: parsedSelected.group       || '—' },
+                    { label: '📞 Phone',         value: parsedSelected.phone       || '—' },
+                    { label: '📆 Applied On',    value: fmtDate(parsedSelected.created_at) },
+                  ].map(r => (
+                    <div key={r.label} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-2.5">
+                      <p className="text-[11px] text-gray-400 font-bold">{r.label}</p>
+                      <p className="text-xs font-bold text-gray-700 text-right">{r.value}</p>
+                    </div>
+                  ))}
 
                 {/* Action buttons */}
                 {selected.status === 'pending' ? (
@@ -395,7 +408,8 @@ const PendingApprovals = () => {
                 )}
               </div>
             </div>
-          ) : (
+            );
+          })() : (
             <div className="bg-white rounded-2xl shadow-sm border border-dashed border-gray-200 p-10 flex flex-col items-center justify-center text-center min-h-[300px]">
               <div className="w-16 h-16 bg-[#eef2ff] rounded-3xl flex items-center justify-center mb-4">
                 <FiUser size={26} className="text-[#102167]"/>

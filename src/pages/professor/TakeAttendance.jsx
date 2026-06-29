@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { fetchEvents } from '../../services/eventsService';
 import { fetchStudentsForEvent, submitAttendance } from '../../services/attendanceService';
+import { parseProfile } from '../../utils/avatarParser';
 import {
   HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineUserGroup,
   HiOutlineCalendar, HiOutlineLocationMarker, HiOutlineSearch
@@ -14,7 +15,10 @@ const TakeAttendance = () => {
   const { auth } = useAuth();
   const [events, setEvents]               = useState([]);
   const [students, setStudents]           = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState('');
+  const [selectedEvent, setSelectedEvent] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('eventId') || '';
+  });
   const [search, setSearch]               = useState('');
   const [attendance, setAttendance]       = useState({});
   const [submitted, setSubmitted]         = useState(false);
@@ -24,7 +28,14 @@ const TakeAttendance = () => {
   /* Load events */
   useEffect(() => {
     fetchEvents()
-      .then(setEvents)
+      .then(data => {
+        setEvents(data);
+        const params = new URLSearchParams(window.location.search);
+        const urlEventId = params.get('eventId');
+        if (urlEventId && data.some(e => e.id === urlEventId)) {
+          setSelectedEvent(urlEventId);
+        }
+      })
       .catch(console.error)
       .finally(() => setLoadingEvents(false));
 
@@ -159,9 +170,10 @@ const TakeAttendance = () => {
 
             <div className="divide-y divide-gray-50">
               {filteredStudents.map((student, i) => {
-                const status = attendance[student.id];
+                const parsed = parseProfile(student);
+                const status = attendance[parsed.id];
                 return (
-                  <div key={student.id}
+                  <div key={parsed.id}
                     className={`flex items-center gap-4 px-6 py-4 transition-colors
                       ${status === 'Present' ? 'bg-emerald-50/40' : status === 'Absent' ? 'bg-red-50/30' : 'hover:bg-gray-50/60'}`}>
 
@@ -169,15 +181,21 @@ const TakeAttendance = () => {
                     <span className="text-xs font-extrabold text-gray-300 w-5 flex-shrink-0">{i + 1}</span>
 
                     {/* Avatar */}
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0
-                      ${status === 'Present' ? 'bg-emerald-500' : status === 'Absent' ? 'bg-red-400' : 'bg-gradient-to-br from-[#102167] to-[#3b4da8]'}`}>
-                      {student.name[0]}
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden
+                      ${status === 'Present' ? 'bg-emerald-500' : status === 'Absent' ? 'bg-red-400' : (parsed.avatar_theme ? `bg-gradient-to-br ${parsed.avatar_theme}` : 'bg-gradient-to-br from-[#102167] to-[#3b4da8]')}`}>
+                      {status === 'Present' ? '✓' : status === 'Absent' ? '✗' : (
+                        parsed.avatar_img ? (
+                          <img src={parsed.avatar_img} alt={parsed.name} className="w-full h-full object-cover" />
+                        ) : (
+                          parsed.avatar_icon || parsed.name?.[0] || '?'
+                        )
+                      )}
                     </div>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-800">{student.name}</p>
-                      <p className="text-[11px] text-gray-400 font-medium">{student.group || '—'}</p>
+                      <p className="text-sm font-bold text-gray-800">{parsed.name}</p>
+                      <p className="text-[11px] text-gray-400 font-medium">{parsed.group || '—'}</p>
                     </div>
 
                     {/* Status badge */}

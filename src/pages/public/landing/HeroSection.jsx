@@ -55,18 +55,18 @@ const HeroSection = () => {
           {/* ── LEFT COLUMN ── */}
           <div className="lg:col-span-5 space-y-10 text-center lg:text-left">
             {/* Accent Pill */}
-            <div className="inline-flex items-center gap-2 bg-[#ef7041]/10 text-[#ef7041] px-5 py-2 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-widest border border-[#ef7041]/20 shadow-sm">
-              🚀 National Service Scheme Connect
+            <div className="inline-flex items-center gap-2 bg-[#ef7041]/10 text-[#ef7041] px-5 py-2 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-widest border border-[#ef7041]/20 shadow-sm opacity-0 reveal-fade-in-up">
+              🚀 NBNSTIC Sinhgad — Official NSS Platform
             </div>
 
             {/* Main Title */}
-            <h1 className="text-[56px] sm:text-[76px] lg:text-[88px] font-black leading-[1.04] tracking-tight">
+            <h1 className="text-[56px] sm:text-[76px] lg:text-[88px] font-black leading-[1.04] tracking-tight opacity-0 reveal-fade-in-up delay-100">
               <span className="block text-[#102167]">Not Me</span>
               <span className="block text-[#ef7041] mt-1.5">But You</span>
             </h1>
 
             {/* Subtitle with Left Accent Bar */}
-            <div className="flex gap-4 items-stretch max-w-lg mx-auto lg:mx-0">
+            <div className="flex gap-4 items-stretch max-w-lg mx-auto lg:mx-0 opacity-0 reveal-fade-in-up delay-200">
               <div className="w-1.5 bg-gradient-to-b from-[#102167] to-[#ef7041] rounded-full hidden sm:block"></div>
               <p className="text-base sm:text-[19px] text-gray-500 font-medium leading-relaxed text-center sm:text-left py-0.5">
                 Together we can create a better society and a stronger nation.
@@ -74,17 +74,31 @@ const HeroSection = () => {
             </div>
 
             {/* Explore More CTA Button */}
-            <div className="pt-2">
+            <div className="pt-2 opacity-0 reveal-fade-in-up delay-300">
               <Link to="/login"
-                className="inline-flex items-center gap-2 bg-[#102167] text-white font-bold px-10 py-5 rounded-full text-base sm:text-lg hover:bg-[#1a2f85] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 group">
+                className="inline-flex items-center gap-2 bg-[#102167] text-white font-bold px-10 py-5 rounded-full text-base sm:text-lg hover:bg-[#1a2f85] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 group border-none cursor-pointer">
                 Explore More
                 <FiArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
+
+            {/* Compact Stats Row */}
+            <div className="pt-6 grid grid-cols-4 gap-2 border-t border-gray-200/50 max-w-lg opacity-0 reveal-fade-in-up delay-400">
+              {stats.map((s, idx) => (
+                <div key={idx} className="flex flex-col">
+                  <span className="text-xl sm:text-2xl font-black text-[#102167] tracking-tight">
+                    <CountUp end={s.value} suffix={s.suffix} />
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5 leading-none">
+                    {s.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* ── RIGHT COLUMN: CIRCULAR & DYNAMIC GRAPHIC (Enlarged Layout) ── */}
-          <div className="lg:col-span-7 flex items-center justify-center relative w-full h-[480px] sm:h-[620px] lg:h-[680px]">
+          <div className="lg:col-span-7 flex items-center justify-center relative w-full h-[480px] sm:h-[620px] lg:h-[680px] opacity-0 reveal-scale-up delay-200">
             
             {/* Multiple Background Accent Rotating Rings */}
             <div className="absolute w-[440px] h-[440px] sm:w-[580px] sm:h-[580px] lg:w-[620px] lg:h-[620px] rounded-full border border-gray-200/50 pointer-events-none z-0"></div>
@@ -156,22 +170,37 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* ── Bottom Floating Stats Bar - Large & Padded ── */}
-      <div className="px-8 pb-8 z-10 w-full">
-        <div className="max-w-6xl mx-auto bg-white rounded-[32px] shadow-[0_16px_48px_rgba(0,0,0,0.05)] border border-gray-100/90 p-6 sm:p-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 divide-x divide-gray-100 text-center">
-            
-            {stats.map((s, idx) => (
-              <div key={idx} className="flex flex-col items-center justify-center px-4">
-                <span className="text-4xl sm:text-5xl font-black text-[#102167] tracking-tight">
-                  <CountUp end={s.value} suffix={s.suffix} />
-                </span>
-                <span className="text-[11px] sm:text-xs font-bold text-gray-400 mt-2.5 uppercase tracking-[0.15em] leading-none">
-                  {s.label}
-                </span>
+      {/* ── Bottom NSS Core Leadership Team Widget ── */}
+      <div className="px-8 pb-8 z-10 w-full opacity-0 reveal-fade-in-up delay-500">
+        <div className="max-w-6xl mx-auto bg-white rounded-[32px] shadow-[0_16px_48px_rgba(0,0,0,0.04)] border border-gray-100/90 p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6 text-center sm:text-left px-1">
+            <div>
+              <h4 className="font-extrabold text-[#102167] text-base sm:text-lg">NSS Core Leadership</h4>
+              <p className="text-xs sm:text-sm text-gray-400 font-semibold mt-0.5">Meet the key coordinators steering our social service initiatives.</p>
+            </div>
+            <div className="w-12 h-0.5 bg-[#ef7041] rounded-full hidden sm:block"></div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 text-center">
+            {[
+              { name: 'Prof. Atul Ballal', role: 'NSS Chief Officer', avatar: 'AB', bg: 'from-blue-700 to-indigo-700', photo: null },
+              { name: 'Sahil Tikande', role: 'NSS Lead', avatar: 'ST', bg: 'from-[#102167] to-[#3b4da8]', photo: '/core leadership/sahil tikande.jpeg' },
+              { name: 'Prathamesh Veer', role: 'Operational Lead', avatar: 'PV', bg: 'from-emerald-500 to-teal-500', photo: '/core leadership/prathamesh.jpeg' },
+              { name: 'Rushikesh Tekale', role: 'Dadachi Shala Lead', avatar: 'RT', bg: 'from-[#ef7041] to-orange-500', photo: '/core leadership/rushikesh.jpeg' }
+            ].map((m, idx) => (
+              <div key={idx} className="flex items-center gap-4 p-4 bg-gray-50/50 rounded-2xl border border-gray-100/40 text-left">
+                {m.photo ? (
+                  <img src={m.photo} alt={m.name} className="w-16 h-16 rounded-2xl object-cover flex-shrink-0 shadow-md" />
+                ) : (
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${m.bg} flex items-center justify-center text-white text-base font-black flex-shrink-0 shadow-md`}>
+                    {m.avatar}
+                  </div>
+                )}
+                <div className="overflow-hidden">
+                  <p className="font-extrabold text-gray-800 text-sm truncate leading-tight">{m.name}</p>
+                  <p className="text-[10px] text-[#ef7041] font-bold mt-1.5 truncate uppercase tracking-wider leading-none">{m.role}</p>
+                </div>
               </div>
             ))}
-
           </div>
         </div>
       </div>

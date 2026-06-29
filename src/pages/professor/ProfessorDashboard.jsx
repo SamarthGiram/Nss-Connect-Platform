@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { mockEvents } from '../../data/mockData';
 import {
@@ -8,8 +9,8 @@ import { FiArrowRight, FiActivity, FiBookOpen, FiCalendar, FiBell, FiCheckSquare
 import { useNavigate } from 'react-router-dom';
 import { BsShieldCheck } from 'react-icons/bs';
 
-const StatCard = ({ icon: Icon, iconBg, label, value, sub, subColor }) => (
-  <div className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+const StatCard = ({ icon: Icon, iconBg, label, value, sub, subColor, onClick }) => (
+  <div onClick={onClick} className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md ${iconBg}`}>
       <Icon size={26} className="text-white" />
     </div>
@@ -31,26 +32,31 @@ const QuickLink = ({ icon: Icon, label, onClick }) => (
 );
 
 const recentActivity = [
-  { icon: HiOutlineCheckCircle, iconColor: 'text-emerald-600', iconBg: 'bg-emerald-50', text: 'Attendance marked for Campus Clean-up Drive', time: '1 hr ago'  },
-  { icon: HiOutlineCalendar,    iconColor: 'text-[#102167]',   iconBg: 'bg-[#eef2ff]', text: 'Blood Donation Camp upcoming — 5 days left',  time: '3 hrs ago' },
-  { icon: HiOutlineUserGroup,   iconColor: 'text-amber-600',   iconBg: 'bg-amber-50',  text: '24 students registered for Tree Drive',       time: '1 day ago' },
-  { icon: BsShieldCheck,        iconColor: 'text-violet-600',  iconBg: 'bg-violet-50', text: 'Attendance report submitted to admin',         time: '2 days ago'},
+  { icon: HiOutlineCheckCircle, iconColor: 'text-emerald-600', iconBg: 'bg-emerald-50', text: 'Attendance marked for Campus Clean-up Drive', time: '1 hr ago',  path: '/professor/attendance' },
+  { icon: HiOutlineCalendar,    iconColor: 'text-[#102167]',   iconBg: 'bg-[#eef2ff]', text: 'Blood Donation Camp upcoming — 5 days left',  time: '3 hrs ago', path: '/professor/events' },
+  { icon: HiOutlineUserGroup,   iconColor: 'text-amber-600',   iconBg: 'bg-amber-50',  text: '24 students registered for Tree Drive',       time: '1 day ago', path: '/professor/students' },
+  { icon: BsShieldCheck,        iconColor: 'text-violet-600',  iconBg: 'bg-violet-50', text: 'Attendance report submitted to admin',         time: '2 days ago', path: '/professor/dashboard' },
 ];
 
 const ProfessorDashboard = () => {
   const { auth } = useAuth();
   const navigate = useNavigate();
   const today = new Date();
+  
+  const [showReportsModal, setShowReportsModal] = useState(false);
+  
+  // Calculate completed events
+  const pastEvents = mockEvents.filter(e => new Date(e.date) < today);
 
   return (
     <div className="space-y-5">
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <StatCard icon={HiOutlineCalendar}      iconBg="bg-gradient-to-br from-[#102167] to-[#3b4da8]" label="Assigned Events"   value={mockEvents.length} sub="This Semester"     subColor="text-gray-400" />
-        <StatCard icon={HiOutlineClipboardCheck} iconBg="bg-gradient-to-br from-amber-400 to-orange-500" label="Attendance Taken"  value="3"                 sub="Events Completed"  subColor="text-amber-500" />
-        <StatCard icon={HiOutlineUserGroup}      iconBg="bg-gradient-to-br from-emerald-400 to-green-500" label="Total Students"   value="48"                sub="Under My Groups"   subColor="text-emerald-500" />
-        <StatCard icon={BsShieldCheck}           iconBg="bg-gradient-to-br from-violet-500 to-purple-600" label="Pending Reports"  value="2"                 sub="Need Submission"   subColor="text-violet-500" />
+        <StatCard icon={HiOutlineCalendar}      iconBg="bg-gradient-to-br from-[#102167] to-[#3b4da8]" label="Assigned Events"   value={mockEvents.length} sub="This Semester"     subColor="text-gray-400" onClick={() => navigate('/professor/events')} />
+        <StatCard icon={HiOutlineClipboardCheck} iconBg="bg-gradient-to-br from-amber-400 to-orange-500" label="Attendance Taken"  value="3"                 sub="Events Completed"  subColor="text-amber-500" onClick={() => navigate('/professor/attendance')} />
+        <StatCard icon={HiOutlineUserGroup}      iconBg="bg-gradient-to-br from-emerald-400 to-green-500" label="Total Students"   value="48"                sub="Under My Groups"   subColor="text-emerald-500" onClick={() => navigate('/professor/students')} />
+        <StatCard icon={BsShieldCheck}           iconBg="bg-gradient-to-br from-violet-500 to-purple-600" label="Pending Reports"  value="2"                 sub="Need Submission"   subColor="text-violet-500" onClick={() => setShowReportsModal(true)} />
       </div>
 
       {/* ── Row 2: Events + Summary ── */}
@@ -62,17 +68,18 @@ const ProfessorDashboard = () => {
             <h3 className="text-base font-extrabold text-gray-800 flex items-center gap-2">
               <HiOutlineCalendar size={18} className="text-[#102167]" /> My Assigned Events
             </h3>
-            <button className="text-[11px] font-bold text-[#102167] bg-[#eef2ff] px-3 py-1.5 rounded-lg hover:bg-[#102167] hover:text-white transition-all duration-200">
+            <button onClick={() => navigate('/professor/events')}
+              className="text-[11px] font-bold text-[#102167] bg-[#eef2ff] px-3 py-1.5 rounded-lg hover:bg-[#102167] hover:text-white transition-all duration-200 border-none bg-transparent">
               View All
             </button>
           </div>
-
           <div className="space-y-3">
             {mockEvents.map(ev => {
               const d = new Date(ev.date);
               const isPast = d < today;
               return (
-                <div key={ev.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors group border border-transparent hover:border-[#102167]/10">
+                <div key={ev.id} onClick={() => navigate('/professor/events')}
+                  className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors group border border-transparent hover:border-[#102167]/10 cursor-pointer">
                   <div className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center flex-shrink-0 ${isPast ? 'bg-gradient-to-br from-gray-400 to-gray-500' : 'bg-gradient-to-br from-[#102167] to-[#3b4da8]'}`}>
                     <p className="text-sm font-extrabold text-white leading-none">{d.getDate()}</p>
                     <p className="text-[9px] font-bold text-blue-200 uppercase">{d.toLocaleString('default',{month:'short'})}</p>
@@ -93,7 +100,8 @@ const ProfessorDashboard = () => {
                     <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${isPast ? 'bg-gray-100 text-gray-500' : 'bg-emerald-50 text-emerald-700'}`}>
                       {isPast ? 'Completed' : 'Active'}
                     </span>
-                    <button className="text-[10px] font-bold text-[#102167] bg-[#eef2ff] px-2.5 py-1 rounded-lg hover:bg-[#102167] hover:text-white transition-all">
+                    <button onClick={(e) => { e.stopPropagation(); navigate('/professor/attendance'); }}
+                      className="text-[10px] font-bold text-[#102167] bg-[#eef2ff] px-2.5 py-1 rounded-lg hover:bg-[#102167] hover:text-white transition-all border-none bg-transparent">
                       Mark Attendance
                     </button>
                   </div>
@@ -103,10 +111,11 @@ const ProfessorDashboard = () => {
 
             {/* Extra upcoming */}
             {[
-              { title: 'Tree Plantation Drive', venue: 'Green Park', date: '28 Jun', time: '09:00 AM' },
+              { title: 'Tree Plantation Drive', venue: 'Green Park', date: '30 Jun', time: '09:00 AM' },
               { title: 'Swachhta Abhiyan',      venue: 'Municipal Area', date: '12 Jul', time: '08:00 AM' },
             ].map((ev, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors group border border-transparent hover:border-[#102167]/10">
+              <div key={i} onClick={() => navigate('/professor/events')}
+                className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors group border border-transparent hover:border-[#102167]/10 cursor-pointer">
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#ef7041] to-[#f48b62] flex flex-col items-center justify-center flex-shrink-0">
                   <p className="text-[10px] font-extrabold text-white leading-tight">{ev.date}</p>
                 </div>
@@ -203,17 +212,66 @@ const ProfessorDashboard = () => {
           {recentActivity.map((act, i) => {
             const IC = act.icon;
             return (
-              <div key={i} className="flex items-center gap-3 p-3.5 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors">
+              <button key={i}
+                onClick={() => navigate(act.path)}
+                className="w-full flex items-center gap-3 p-3.5 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors text-left border-none shadow-none hover:shadow-none bg-transparent">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${act.iconBg}`}>
                   <IC size={17} className={act.iconColor}/>
                 </div>
                 <p className="text-sm font-semibold text-gray-700 flex-1">{act.text}</p>
                 <span className="text-[10px] text-gray-400 font-medium flex-shrink-0">{act.time}</span>
-              </div>
+              </button>
             );
           })}
         </div>
       </div>
+      {/* ── Pending Reports Modal ── */}
+      {showReportsModal && (
+        <>
+          <div className="fixed inset-0 bg-black/45 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowReportsModal(false)}>
+            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-gray-100/90 relative" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-lg font-extrabold text-[#102167] flex items-center gap-2">
+                <BsShieldCheck size={20} className="text-[#ef7041]"/>
+                Pending Event Reports
+              </h3>
+              <p className="text-xs text-gray-500 font-medium mt-1">
+                The following {pastEvents.length} completed events require volunteer attendance records to be submitted to the Admin.
+              </p>
+              
+              <div className="mt-4 space-y-3">
+                {pastEvents.map(e => (
+                  <div key={e.id} className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between gap-3">
+                    <div>
+                      <h4 className="text-sm font-extrabold text-gray-700 leading-snug">{e.title}</h4>
+                      <p className="text-[10px] text-gray-400 font-bold mt-0.5 uppercase tracking-wide">
+                        {new Date(e.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} • {e.venue}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowReportsModal(false);
+                        navigate(`/professor/attendance?eventId=${e.id}`);
+                      }}
+                      className="text-xs font-extrabold text-white bg-[#102167] px-3.5 py-2 rounded-xl hover:bg-[#ef7041] transition-all shadow-md border-none flex-shrink-0 cursor-pointer"
+                    >
+                      Submit Report
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setShowReportsModal(false)}
+                  className="px-5 py-2 bg-gray-100 text-gray-600 text-xs font-bold rounded-xl hover:bg-gray-200 transition-colors border-none cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
     </div>
   );

@@ -32,6 +32,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError]         = useState('');
   const [loading, setLoading]     = useState(false);
+  const [selectedRole, setSelectedRole] = useState(null);
 
   /* Cycle pillars every 2.5 s */
   useEffect(() => {
@@ -154,18 +155,7 @@ const LoginPage = () => {
           </div>
         </div>
 
-        {/* Bottom credentials hint */}
-        <div className="relative z-10 px-10 pb-8">
-          <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-3">Demo Credentials (pass: Role@123)</p>
-          <div className="flex flex-col gap-1.5">
-            {CREDENTIALS.map(c => (
-              <div key={c.role} className="flex items-center gap-3 text-xs">
-                <span className={`font-extrabold w-20 ${c.color}`}>{c.role}</span>
-                <span className="text-white/40 font-mono">{c.email}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+
       </div>
 
       {/* ══════════════════════ RIGHT PANEL ══════════════════════ */}
@@ -281,25 +271,27 @@ const LoginPage = () => {
             </button>
           </form>
 
+
           {/* Divider */}
           <div className="w-full my-6 flex items-center gap-3">
             <div className="flex-1 h-px bg-gray-100"></div>
-            <span className="text-[11px] text-gray-300 font-bold uppercase tracking-wider">OR</span>
+            <span className="text-[11px] text-gray-300 font-bold uppercase tracking-wider">Login As</span>
             <div className="flex-1 h-px bg-gray-100"></div>
           </div>
 
-          {/* Quick login pills */}
+          {/* Role pills — clickable selector */}
           <div className="w-full">
-            <p className="text-[11px] text-gray-400 font-bold uppercase tracking-wider mb-3 text-center">Quick Demo Login</p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { label: 'Admin',     email: 'admin@nss.com',   password: 'Admin@123',   color: 'border-[#102167]/20 hover:border-[#102167] hover:bg-[#eef2ff] text-[#102167]'  },
-                { label: 'Professor', email: 'prof@nss.com',    password: 'Prof@123',    color: 'border-amber-200   hover:border-amber-400 hover:bg-amber-50  text-amber-700'    },
-                { label: 'Student',   email: 'student@nss.com', password: 'Student@123', color: 'border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 text-emerald-700'},
+                { label: 'Admin',     selected: 'bg-[#102167]  text-white',                                    unselected: 'border-2 border-[#102167]/25  bg-[#eef2ff]  text-[#102167]/60'  },
+                { label: 'Professor', selected: 'bg-amber-400   text-white',                                    unselected: 'border-2 border-amber-300     bg-amber-50    text-amber-500'     },
+                { label: 'Student',   selected: 'bg-emerald-500 text-white',                                    unselected: 'border-2 border-emerald-300   bg-emerald-50  text-emerald-600'  },
               ].map(q => (
                 <button key={q.label} type="button"
-                  onClick={() => { setEmail(q.email); setPassword(q.password); }}
-                  className={`py-2.5 px-3 rounded-xl border-2 text-xs font-extrabold transition-all duration-200 bg-white ${q.color}`}>
+                  onClick={() => setSelectedRole(q.label)}
+                  className={`py-2.5 px-3 rounded-xl text-xs font-extrabold text-center transition-all duration-200 cursor-pointer outline-none focus:outline-none
+                    ${selectedRole === q.label ? q.selected : q.unselected}
+                    ${selectedRole && selectedRole !== q.label ? 'opacity-40' : 'opacity-100'}`}>
                   {q.label}
                 </button>
               ))}

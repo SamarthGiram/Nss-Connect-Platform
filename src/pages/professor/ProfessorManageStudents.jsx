@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import {
   HiOutlineSearch, HiOutlineMail,
   HiOutlinePencil, HiOutlineAcademicCap,
-  HiOutlineCheckCircle, HiOutlineXCircle
+  HiOutlineCheckCircle, HiOutlineXCircle,
+  HiOutlineTrash
 } from 'react-icons/hi';
 import { FiSave, FiX, FiRefreshCw } from 'react-icons/fi';
-import { fetchAllUsers, updateUserProfile } from '../../services/usersService';
+import { fetchAllUsers, updateUserProfile, deleteUserProfile } from '../../services/usersService';
+import { parseProfile } from '../../utils/avatarParser';
 
 const ROLE_STYLES = {
   student:   { label: 'Student',   bg: 'bg-[#eef2ff] text-[#102167]',   icon: HiOutlineAcademicCap },
@@ -75,6 +77,16 @@ const ProfessorManageStudents = () => {
       setUsers(prev => prev.map(u => u.id === id ? { ...u, status: newStatus } : u));
     } catch (err) {
       alert('Update failed: ' + err.message);
+    }
+  };
+
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to delete student "${name}"? This action cannot be undone.`)) return;
+    try {
+      await deleteUserProfile(id);
+      setUsers(prev => prev.filter(u => u.id !== id));
+    } catch (err) {
+      alert('Failed to delete student: ' + err.message);
     }
   };
 
@@ -172,14 +184,19 @@ const ProfessorManageStudents = () => {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.map(u => {
+                const parsed = parseProfile(u);
                 return (
-                  <tr key={u.id} className="hover:bg-gray-50/60 transition-colors group">
+                  <tr key={parsed.id} className="hover:bg-gray-50/60 transition-colors group">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#102167] to-[#3b4da8] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                          {u.name?.[0] || '?'}
+                        <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${parsed.avatar_theme || 'from-[#102167] to-[#3b4da8]'} flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden`}>
+                          {parsed.avatar_img ? (
+                            <img src={parsed.avatar_img} alt={parsed.name} className="w-full h-full object-cover" />
+                          ) : (
+                            parsed.avatar_icon || parsed.name?.[0] || '?'
+                          )}
                         </div>
-                        <p className="text-sm font-bold text-gray-800">{u.name}</p>
+                        <p className="text-sm font-bold text-gray-800">{parsed.name}</p>
                       </div>
                     </td>
                     <td className="px-5 py-4">
@@ -206,10 +223,14 @@ const ProfessorManageStudents = () => {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2">
                         <button onClick={() => openEdit(u)}
                           className="p-2 bg-[#eef2ff] text-[#102167] rounded-lg hover:bg-[#102167] hover:text-white transition-all">
                           <HiOutlinePencil size={13}/>
+                        </button>
+                        <button onClick={() => handleDelete(u.id, u.name)}
+                          className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all">
+                          <HiOutlineTrash size={13}/>
                         </button>
                       </div>
                     </td>

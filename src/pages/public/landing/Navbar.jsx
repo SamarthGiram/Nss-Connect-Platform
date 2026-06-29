@@ -45,7 +45,7 @@ const Navbar = () => {
           <img src={nssLogo} alt="NSS" className="w-[56px] h-[56px] sm:w-[64px] sm:h-[64px] object-contain rounded-full shadow-sm" />
           <div className="leading-tight">
             <p className="text-[13px] sm:text-[15px] font-black text-[#102167] tracking-[0.15em] uppercase">National Service Scheme</p>
-            <p className="text-[11px] sm:text-[12.5px] text-[#ef7041] font-bold mt-0.5">Not Me But You</p>
+            <p className="text-[10px] sm:text-[11.5px] text-[#ef7041] font-bold mt-0.5 uppercase tracking-wider">NBNSTIC Sinhgad — Not Me But You</p>
           </div>
         </div>
 
