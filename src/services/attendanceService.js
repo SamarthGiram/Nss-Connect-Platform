@@ -35,7 +35,7 @@ export const fetchEventAttendance = async (eventId) => {
     .from('attendance')
     .select(`
       *,
-      profiles!attendance_student_id_fkey (id, name, email, roll_number, "group", avatar_theme, avatar_icon, avatar_img)
+      profiles!attendance_student_id_fkey (id, name, email, roll_number, "group", department)
     `)
     .eq('event_id', eventId);
   if (error) throw error;
@@ -46,7 +46,7 @@ export const fetchEventAttendance = async (eventId) => {
 export const fetchStudentsForEvent = async () => {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, name, email, roll_number, "group", avatar_theme, avatar_icon, avatar_img')
+    .select('id, name, email, roll_number, "group", department')
     .eq('role', 'student')
     .order('name');
   if (error) throw error;
