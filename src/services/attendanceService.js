@@ -35,7 +35,7 @@ export const fetchEventAttendance = async (eventId) => {
     .from('attendance')
     .select(`
       *,
-      profiles!attendance_student_id_fkey (id, name, email, roll_number, "group", department)
+      profiles!attendance_student_id_fkey (id, name, email, roll_number, group, department)
     `)
     .eq('event_id', eventId);
   if (error) throw error;
@@ -46,7 +46,7 @@ export const fetchEventAttendance = async (eventId) => {
 export const fetchStudentsForEvent = async () => {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, name, email, roll_number, "group", department')
+    .select('id, name, email, roll_number, group, department')
     .eq('role', 'student')
     .order('name');
   if (error) throw error;
@@ -78,4 +78,41 @@ export const fetchStudentAttendanceSummary = async (studentId) => {
   const present = rows.filter(r => r.status === 'Present').length;
   const pct     = total > 0 ? Math.round((present / total) * 100) : 0;
   return { total, present, absent: total - present, pct };
+};
+
+/* ── Fetch Leaderboard Data ── */
+export const fetchLeaderboard = async () => {
+  // Fetch all present records
+  const { data: attendanceData, error: attError } = await supabase
+    .from('attendance')
+    .select('student_id')
+    .eq('status', 'Present');
+    
+  if (attError) throw attError;
+
+  // Fetch all active students
+  const { data: profiles, error: profError } = await supabase
+    .from('profiles')
+    .select('id, name, department')
+    .eq('role', 'student');
+    
+  if (profError) throw profError;
+
+  // Calculate points
+  const pointsMap = {};
+  attendanceData.forEach(r => {
+    pointsMap[r.student_id] = (pointsMap[r.student_id] || 0) + 10;
+  });
+
+  // Merge points, filter out students with 0 points (optional, but good for leaderboard), sort, and get top 3
+  let leaderboard = profiles.map(p => ({
+    ...p,
+    points: pointsMap[p.id] || 0
+  })).sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    return a.name.localeCompare(b.name);
+  });
+
+  // Return full sorted list
+  return leaderboard;
 };

@@ -8,6 +8,7 @@ import {
 import { BsShieldCheck } from 'react-icons/bs';
 import { FiArrowRight, FiTrendingUp, FiActivity, FiUserPlus, FiCalendar, FiBell, FiCheckSquare } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import LeaderboardWidget from '../../components/LeaderboardWidget';
 
 const StatCard = ({ icon: Icon, iconBg, label, value, sub, subColor, onClick }) => (
   <div onClick={onClick} className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
@@ -228,6 +229,11 @@ const AdminDashboard = () => {
                 ))}
               </div>
             )}
+          </div>
+          
+          {/* Leaderboard */}
+          <div className="flex-1">
+            <LeaderboardWidget />
           </div>
         </div>
       </div>

@@ -25,6 +25,7 @@ import TakeAttendance from './pages/professor/TakeAttendance';
 import ProfessorManageStudents from './pages/professor/ProfessorManageStudents';
 import MyAttendance from './pages/student/MyAttendance';
 import RegisterPage from './pages/public/RegisterPage';
+import LeaderboardPage from './pages/shared/LeaderboardPage';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
               <Route path="approvals"     element={<PendingApprovals />} />
               <Route path="announcements" element={<ManageAnnouncements />} />
               <Route path="attendance"    element={<TakeAttendance />} />
+              <Route path="leaderboard"   element={<LeaderboardPage />} />
               <Route path="profile"       element={<Profile />} />
             </Route>
           </Route>
@@ -58,6 +60,7 @@ function App() {
               <Route path="announcements" element={<ManageAnnouncements />} />
               <Route path="approvals"     element={<PendingApprovals />} />
               <Route path="students"      element={<ProfessorManageStudents />} />
+              <Route path="leaderboard"   element={<LeaderboardPage />} />
               <Route path="profile"       element={<Profile />} />
             </Route>
           </Route>
@@ -68,6 +71,7 @@ function App() {
               <Route path="dashboard"     element={<StudentDashboard />} />
               <Route path="events"        element={<StudentEvents />} />
               <Route path="attendance"    element={<MyAttendance />} />
+              <Route path="leaderboard"   element={<LeaderboardPage />} />
               <Route path="profile"       element={<Profile />} />
               <Route path="announcements" element={<StudentAnnouncements />} />
             </Route>

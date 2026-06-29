@@ -4,13 +4,14 @@ import { useAuth } from '../context/AuthContext';
 import nssLogo from '../assets/nss.png';
 import { HiOutlineViewGrid, HiOutlineCalendar, HiOutlineClipboardCheck, HiOutlineUser, HiOutlineMenuAlt2, HiOutlineX, HiOutlineSpeakerphone } from 'react-icons/hi';
 import { parseProfile } from '../utils/avatarParser';
-import { FiBell, FiChevronDown, FiLogOut } from 'react-icons/fi';
+import { FiBell, FiChevronDown, FiLogOut, FiAward } from 'react-icons/fi';
 
 const studentLinks = [
   { name: 'Dashboard',       path: '/student/dashboard',      icon: HiOutlineViewGrid       },
   { name: 'Upcoming Events', path: '/student/events',         icon: HiOutlineCalendar       },
   { name: 'My Attendance',   path: '/student/attendance',     icon: HiOutlineClipboardCheck },
   { name: 'Announcements',   path: '/student/announcements',  icon: HiOutlineSpeakerphone   },
+  { name: 'Leaderboard',     path: '/student/leaderboard',    icon: FiAward                 },
   { name: 'My Profile',      path: '/student/profile',        icon: HiOutlineUser           },
 ];
 

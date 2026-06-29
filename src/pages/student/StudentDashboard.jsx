@@ -10,6 +10,7 @@ import {
 } from 'react-icons/hi';
 import { FiArrowRight, FiActivity } from 'react-icons/fi';
 import { BsShieldCheck } from 'react-icons/bs';
+import LeaderboardWidget from '../../components/LeaderboardWidget';
 
 // ─── Circular Progress ───────────────────────────────────────────
 const CircularProgress = ({ percent }) => {
@@ -309,6 +310,11 @@ const StudentDashboard = () => {
             <QuickLink icon={QuickLink && HiOutlinePhone} label="Contact Coordinator" onClick={() => alert('NSS Coordinator Contact:\nEmail: coordinator@nss-college.edu\nPhone: +91 98765 43210')} />
           </div>
         </div>
+      </div>
+
+      {/* ── Row 4: Leaderboard ── */}
+      <div className="grid grid-cols-1 gap-4 mt-2">
+        <LeaderboardWidget />
       </div>
     </div>
   );

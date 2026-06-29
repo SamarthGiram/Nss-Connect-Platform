@@ -8,6 +8,7 @@ import {
 import { FiArrowRight, FiActivity, FiBookOpen, FiCalendar, FiBell, FiCheckSquare, FiUsers } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { BsShieldCheck } from 'react-icons/bs';
+import LeaderboardWidget from '../../components/LeaderboardWidget';
 
 const StatCard = ({ icon: Icon, iconBg, label, value, sub, subColor, onClick }) => (
   <div onClick={onClick} className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
@@ -181,6 +182,11 @@ const ProfessorDashboard = () => {
               <HiOutlineCheckCircle size={14} className="text-amber-500 flex-shrink-0"/>
               <p className="text-xs text-amber-700 font-bold">2 events pending attendance</p>
             </div>
+          </div>
+
+          {/* Leaderboard */}
+          <div className="flex-1">
+            <LeaderboardWidget />
           </div>
         </div>
       </div>

@@ -9,13 +9,14 @@ import {
   HiOutlineClipboardCheck, HiOutlineMenuAlt2, HiOutlineX,
   HiOutlineSpeakerphone, HiOutlineUser
 } from 'react-icons/hi';
-import { FiBell, FiChevronDown, FiShield, FiLogOut, FiUser } from 'react-icons/fi';
+import { FiBell, FiChevronDown, FiShield, FiLogOut, FiUser, FiAward } from 'react-icons/fi';
 
 const adminLinks = [
   { name: 'Dashboard',            path: '/admin/dashboard',      icon: HiOutlineViewGrid,       badge: null },
   { name: 'Manage Events',        path: '/admin/events',         icon: HiOutlineCalendar,       badge: null },
   { name: 'Take Attendance',      path: '/admin/attendance',     icon: HiOutlineClipboardCheck, badge: null },
   { name: 'Announcements',        path: '/admin/announcements',  icon: HiOutlineSpeakerphone,   badge: null },
+  { name: 'Leaderboard',          path: '/admin/leaderboard',    icon: FiAward,                 badge: null },
   { name: 'Manage Users',         path: '/admin/users',          icon: HiOutlineUserGroup,       badge: null },
   { name: 'Student Approvals',    path: '/admin/approvals',      icon: HiOutlineClipboardCheck, badge: 'pending' },
   { name: 'My Profile',           path: '/admin/profile',        icon: HiOutlineUser,           badge: null },

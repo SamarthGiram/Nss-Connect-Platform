@@ -9,13 +9,14 @@ import {
   HiOutlineMenuAlt2, HiOutlineX, HiOutlineSpeakerphone, HiOutlineUserGroup,
   HiOutlineUser
 } from 'react-icons/hi';
-import { FiBell, FiChevronDown, FiBookOpen, FiLogOut, FiUser } from 'react-icons/fi';
+import { FiBell, FiChevronDown, FiBookOpen, FiLogOut, FiUser, FiAward } from 'react-icons/fi';
 
 const professorLinks = [
   { name: 'Dashboard',          path: '/professor/dashboard',      icon: HiOutlineViewGrid,       badge: null  },
   { name: 'My Events',          path: '/professor/events',         icon: HiOutlineCalendar,       badge: null  },
   { name: 'Take Attendance',    path: '/professor/attendance',     icon: HiOutlineClipboardCheck, badge: null  },
   { name: 'Announcements',      path: '/professor/announcements',  icon: HiOutlineSpeakerphone,   badge: null  },
+  { name: 'Leaderboard',        path: '/professor/leaderboard',    icon: FiAward,                 badge: null  },
   { name: 'Manage Students',    path: '/professor/students',       icon: HiOutlineUserGroup,      badge: null  },
   { name: 'Student Approvals',  path: '/professor/approvals',      icon: HiOutlineClipboardCheck, badge: 'pending' },
   { name: 'My Profile',         path: '/professor/profile',        icon: HiOutlineUser,           badge: null  },

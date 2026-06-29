@@ -1,20 +1,8 @@
 import { useState, useEffect } from 'react';
-import { HiOutlineCalendar, HiOutlineLocationMarker, HiOutlineClock, HiOutlineSearch, HiOutlineFilter } from 'react-icons/hi';
-import { FiArrowRight, FiCheckCircle } from 'react-icons/fi';
-import { useState, useEffect } from 'react';
-import { HiOutlineCalendar, HiOutlineLocationMarker, HiOutlineClock, HiOutlineSearch, HiOutlineFilter } from 'react-icons/hi';
+import { HiOutlineCalendar, HiOutlineLocationMarker, HiOutlineClock, HiOutlineSearch } from 'react-icons/hi';
 import { FiArrowRight, FiCheckCircle } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { fetchEvents, fetchStudentRegistrations, registerForEvent, unregisterFromEvent } from '../../services/eventsService';
-
-const allEvents = [
-  { id: 1, day: '30', month: 'JUN', title: 'Tree Plantation Drive', venue: 'Green Park, Pune', time: '09:00 AM', tag: 'Environment', tagColor: 'bg-emerald-50 text-emerald-700', status: 'upcoming', desc: 'Join us for a city-wide tree plantation drive to increase green cover and raise awareness about deforestation.' },
-  { id: 2, day: '05', month: 'JUL', title: 'Blood Donation Camp', venue: 'Civil Hospital, Pune', time: '10:00 AM', tag: 'Health', tagColor: 'bg-red-50 text-red-600', status: 'upcoming', desc: 'Donate blood and save lives. Every unit of blood can save up to three lives. Bring your ID proof.' },
-  { id: 3, day: '12', month: 'JUL', title: 'Swachhta Abhiyan', venue: 'Pune Municipal Area', time: '08:00 AM', tag: 'Sanitation', tagColor: 'bg-blue-50 text-blue-700', status: 'upcoming', desc: 'Mass cleanliness drive in collaboration with Pune Municipal Corporation across 10 wards.' },
-  { id: 4, day: '18', month: 'JUL', title: 'Rural Education Camp', venue: 'Wagholi Village, Pune', time: '07:30 AM', tag: 'Education', tagColor: 'bg-violet-50 text-violet-700', status: 'upcoming', desc: 'Teaching basic literacy and numeracy to underprivileged children in rural areas.' },
-  { id: 5, day: '15', month: 'JUN', title: 'Campus Clean-Up Drive', venue: 'Samarth College Campus', time: '09:00 AM', tag: 'Sanitation', tagColor: 'bg-blue-50 text-blue-700', status: 'completed', desc: 'Annual campus cleaning initiative. Successfully completed with 120+ volunteers.' },
-  { id: 6, day: '10', month: 'JUN', title: 'Covid Awareness Rally', venue: 'FC Road, Pune', time: '08:00 AM', tag: 'Health', tagColor: 'bg-red-50 text-red-600', status: 'completed', desc: 'Awareness rally about preventive health measures. Over 500 pamphlets distributed.' },
-];
 
 const StudentEvents = () => {
   const { auth } = useAuth();
