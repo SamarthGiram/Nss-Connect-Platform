@@ -74,35 +74,19 @@ const mediaItems = [
 
 const testimonials = [
   {
-    name: 'Priya Sharma',
+    name: 'Mayur Pawar',
     role: 'NSS Volunteer, 2nd Year',
-    quote: 'NSS transformed my outlook on life. The community service activities taught me empathy and leadership beyond textbooks.',
-    avatar: 'PS',
+    quote: 'NSS gave me the opportunity to step outside the classroom and make a real difference. Every camp taught me something textbooks never could.',
+    avatar: 'MP',
     color: 'bg-[#102167]',
     rating: 5,
   },
   {
-    name: 'Rahul Patil',
-    role: 'NSS Unit Secretary',
-    quote: 'Being an NSS secretary helped me develop organisational skills. The motto "Not Me But You" is something I live by every day.',
-    avatar: 'RP',
-    color: 'bg-[#ef7041]',
-    rating: 5,
-  },
-  {
-    name: 'Soham Kale',
+    name: 'Rushikesh Suryavanshi',
     role: 'NSS Volunteer, 3rd Year',
-    quote: 'Organizing the Swachhta Abhiyan taught me how small steps can lead to clean, healthy surroundings. Proud to be an NSS member.',
-    avatar: 'SK',
+    quote: 'The Dadachi Shala initiative changed my perspective completely. Seeing children light up as they learn is a reward no certificate can match.',
+    avatar: 'RS',
     color: 'bg-emerald-600',
-    rating: 5,
-  },
-  {
-    name: 'Anniruddha Sonwane',
-    role: 'NSS Volunteer, 2nd Year',
-    quote: 'Developing solutions for local communities during the Special Youth Camp gave me a real-world perspective on engineering and social service.',
-    avatar: 'AS',
-    color: 'bg-indigo-600',
     rating: 5,
   },
   {
@@ -114,28 +98,60 @@ const testimonials = [
     rating: 4.5,
   },
   {
-    name: 'Adwait Chavhan',
-    role: 'NSS Core Committee Member',
-    quote: 'NSS has helped me grow as a leader. Managing campaigns and coordinating with students has given me immense civic responsibility.',
-    avatar: 'AC',
+    name: 'Om Katke',
+    role: 'NSS Volunteer, 2nd Year',
+    quote: 'Working alongside fellow volunteers during swachhta drives showed me the power of collective action. Small efforts, massive impact.',
+    avatar: 'OK',
+    color: 'bg-indigo-600',
+    rating: 4,
+  },
+  {
+    name: 'Samarth Giram',
+    role: 'NSS Volunteer, 3rd Year',
+    quote: 'NSS has shaped me into a more responsible individual. Managing real campaigns on ground gave me skills no classroom curriculum could offer.',
+    avatar: 'SG',
     color: 'bg-[#ef7041]',
     rating: 5,
   },
   {
-    name: 'Sahil Tikande',
-    role: 'NSS Volunteer, 3rd Year',
-    quote: 'The digital literacy and rural teaching programs were extremely rewarding. Teaching children in adopted villages is a feeling like no other.',
-    avatar: 'ST',
+    name: 'Ashutosh Markad',
+    role: 'NSS Volunteer, 2nd Year',
+    quote: 'Participating in health awareness drives was truly humbling. NSS made me realise how even a student can be an agent of social change.',
+    avatar: 'AM',
     color: 'bg-teal-600',
     rating: 4.5,
   },
   {
-    name: 'Ananya Kulkarni',
+    name: 'Shritej Dhere',
     role: 'NSS Volunteer, 3rd Year',
-    quote: 'The blood donation camp we organised saved real lives. NSS gives you a purpose beyond your own ambitions.',
-    avatar: 'AK',
+    quote: 'The environmental campaigns we ran were incredible. Planting trees and cleaning public spaces made us feel connected to something much bigger than ourselves.',
+    avatar: 'SD',
     color: 'bg-[#102167]',
     rating: 5,
+  },
+  {
+    name: 'Abhay Dalve',
+    role: 'NSS Volunteer, 2nd Year',
+    quote: 'Every NSS activity reminded me of why "Not Me But You" is more than just a motto. It is a way of living with purpose and compassion.',
+    avatar: 'AD',
+    color: 'bg-violet-600',
+    rating: 4,
+  },
+  {
+    name: 'Gaurav Kate',
+    role: 'NSS Volunteer, 3rd Year',
+    quote: 'Organising the special youth camp was a test of leadership under pressure. NSS helped me grow from a student into a responsible community leader.',
+    avatar: 'GK',
+    color: 'bg-[#ef7041]',
+    rating: 5,
+  },
+  {
+    name: 'Kiran Jathar',
+    role: 'NSS Volunteer, 2nd Year',
+    quote: 'The rural outreach programs opened my eyes to realities I had never seen before. This experience made me a more empathetic and grounded person.',
+    avatar: 'KJ',
+    color: 'bg-cyan-600',
+    rating: 4.5,
   },
 ];
 
@@ -159,33 +175,34 @@ const GalleryAndTestimonials = () => {
       {/* CSS styling for Marquee Animation */}
       <style>{`
         @keyframes marquee {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
         }
         @keyframes marquee-reverse {
-          0% {
-            transform: translateX(-50%);
-          }
-          100% {
-            transform: translateX(0);
-          }
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
         }
+        /* Gallery: left → 40s */
         .animate-marquee-sync {
           display: flex;
           width: max-content;
-          animation: marquee 45s linear infinite;
+          animation: marquee 40s linear infinite;
         }
+        /* Achievement: right → 35s (faster, opposite) */
+        .animate-marquee-achievement {
+          display: flex;
+          width: max-content;
+          animation: marquee-reverse 35s linear infinite;
+        }
+        /* Testimonials: left → 60s (slow drift) */
         .animate-marquee-testimonials {
           display: flex;
           width: max-content;
-          animation: marquee-reverse 55s linear infinite;
+          animation: marquee 60s linear infinite;
         }
-        /* Pause scroll on hover */
+        /* Pause all on hover */
         .marquee-container:hover .animate-marquee-sync,
+        .marquee-container:hover .animate-marquee-achievement,
         .marquee-container:hover .animate-marquee-testimonials {
           animation-play-state: paused;
         }
@@ -244,6 +261,75 @@ const GalleryAndTestimonials = () => {
 
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Achievement Gallery Section */}
+      <section id="achievements" className="py-16 bg-[#102167] overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 mb-10">
+          <div className="text-center">
+            <span className="text-xs font-bold text-[#ef7041] uppercase tracking-widest">Milestones</span>
+            <h2 className="text-4xl font-extrabold text-white mt-2">
+              Volunteer <span className="text-[#ef7041]">Achievements</span>
+            </h2>
+            <div className="w-16 h-1 bg-gradient-to-r from-[#ef7041] to-orange-300 rounded-full mx-auto mt-4"></div>
+            <p className="text-blue-200 text-sm mt-3 font-medium">
+              Celebrating every volunteer who made a difference
+            </p>
+          </div>
+        </div>
+
+        {/* Achievement Marquee — reverse direction */}
+        <div className="marquee-container relative w-full overflow-hidden py-4">
+          <div className="animate-marquee-achievement flex gap-5 px-3">
+            {[
+              '/achievement/WhatsApp Image 2026-06-29 at 12.18.13 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.18.26 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.18.42 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.40 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.41 AM (1).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.41 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.42 AM (1).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.42 AM (2).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.42 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.43 AM (1).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.43 AM (2).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.43 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.44 AM (1).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.44 AM (2).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.44 AM.jpeg',
+            ].concat([
+              '/achievement/WhatsApp Image 2026-06-29 at 12.18.13 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.18.26 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.18.42 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.40 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.41 AM (1).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.41 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.42 AM (1).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.42 AM (2).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.42 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.43 AM (1).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.43 AM (2).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.43 AM.jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.44 AM (1).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.44 AM (2).jpeg',
+              '/achievement/WhatsApp Image 2026-06-29 at 12.21.44 AM.jpeg',
+            ]).map((src, idx) => (
+              <div
+                key={idx}
+                className="relative w-[200px] h-[200px] flex-shrink-0 rounded-full overflow-hidden shadow-xl hover:shadow-[0_0_30px_rgba(239,112,65,0.5)] hover:scale-[1.08] transition-all duration-500 group ring-4 ring-white/10 hover:ring-[#ef7041]/70"
+              >
+                <img
+                  src={src}
+                  alt={`Achievement ${idx + 1}`}
+                  loading="lazy"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                {/* Gradient overlay on hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#102167]/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
               </div>
             ))}
           </div>

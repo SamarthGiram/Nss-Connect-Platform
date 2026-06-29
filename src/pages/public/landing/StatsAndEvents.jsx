@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
 
 const events = [
-  { day: '28', month: 'JUN', title: 'Tree Plantation Drive', venue: 'Green Park, Pune', time: '09:00 AM', tag: 'Environment' },
+  { day: '30', month: 'JUN', title: 'Tree Plantation Drive', venue: 'Green Park, Pune', time: '09:00 AM', tag: 'Environment' },
   { day: '05', month: 'JUL', title: 'Blood Donation Camp', venue: 'Civil Hospital, Pune', time: '10:00 AM', tag: 'Health' },
   { day: '12', month: 'JUL', title: 'Swachhta Abhiyan', venue: 'Pune Municipal Area', time: '08:00 AM', tag: 'Sanitation' },
 ];

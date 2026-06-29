@@ -1,5 +1,6 @@
 import { useAuth } from '../../context/AuthContext';
-import { mockEvents, mockUsers } from '../../data/mockData';
+import { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabase';
 import {
   HiOutlineCalendar, HiOutlineUserGroup, HiOutlineClipboardCheck,
   HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineLocationMarker, HiOutlineClock
@@ -7,10 +8,6 @@ import {
 import { BsShieldCheck } from 'react-icons/bs';
 import { FiArrowRight, FiTrendingUp, FiActivity, FiUserPlus, FiCalendar, FiBell, FiCheckSquare } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-
-const users   = Object.values(mockUsers);
-const students    = users.filter(u => u.role === 'student');
-const professors  = users.filter(u => u.role === 'professor');
 
 const StatCard = ({ icon: Icon, iconBg, label, value, sub, subColor, onClick }) => (
   <div onClick={onClick} className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
@@ -34,35 +31,78 @@ const QuickLink = ({ icon: Icon, label, onClick }) => (
   </button>
 );
 
-const recentActivity = [
-  { icon: HiOutlineCheckCircle, iconColor: 'text-emerald-600', iconBg: 'bg-emerald-50', text: 'Tree Plantation Drive attendance marked', time: '10 min ago', path: '/admin/attendance' },
-  { icon: HiOutlineUserGroup,   iconColor: 'text-blue-600',    iconBg: 'bg-blue-50',    text: 'New student Priya Sharma registered',   time: '1 hr ago',  path: '/admin/users' },
-  { icon: HiOutlineCalendar,    iconColor: 'text-[#102167]',   iconBg: 'bg-[#eef2ff]', text: 'Blood Donation Camp event created',       time: '2 hrs ago', path: '/admin/events' },
-  { icon: HiOutlineExclamationCircle, iconColor: 'text-[#ef7041]', iconBg: 'bg-orange-50', text: '3 pending approval requests',        time: '3 hrs ago', path: '/admin/approvals' },
-];
-
-const pendingItems = [
-  { name: 'Rahul Patil',   type: 'Student Registration', time: '2 hrs ago' },
-  { name: 'Ananya K.',     type: 'Attendance Correction', time: '4 hrs ago' },
-  { name: 'Prof. Sharma',  type: 'Event Creation Request', time: '5 hrs ago' },
-];
-
 const AdminDashboard = () => {
   const { auth } = useAuth();
   const navigate = useNavigate();
+
+  const [stats, setStats] = useState({ students: 0, professors: 0, events: 0, pending: 0 });
+  const [pendingUsers, setPendingUsers] = useState([]);
+  const [recentEvents, setRecentEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        // Count students
+        const { count: studentCount } = await supabase
+          .from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student');
+
+        // Count professors
+        const { count: profCount } = await supabase
+          .from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'professor');
+
+        // Count pending approvals
+        const { count: pendingCount } = await supabase
+          .from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'pending');
+
+        // Fetch pending users (up to 3 for preview)
+        const { data: pendingData } = await supabase
+          .from('profiles')
+          .select('id, name, email, role, created_at')
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        // Count events
+        const { count: eventCount } = await supabase
+          .from('events').select('*', { count: 'exact', head: true });
+
+        // Fetch recent events
+        const { data: eventsData } = await supabase
+          .from('events')
+          .select('id, title, date, venue, status')
+          .order('date', { ascending: false })
+          .limit(4);
+
+        setStats({
+          students:   studentCount  || 0,
+          professors: profCount     || 0,
+          events:     eventCount    || 0,
+          pending:    pendingCount  || 0,
+        });
+        setPendingUsers(pendingData || []);
+        setRecentEvents(eventsData  || []);
+      } catch (err) {
+        console.error('AdminDashboard load error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   return (
     <div className="space-y-5">
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <StatCard icon={HiOutlineCalendar}   iconBg="bg-gradient-to-br from-[#102167] to-[#3b4da8]" label="Total Events"    value={mockEvents.length} sub="This Semester"     subColor="text-gray-400" onClick={() => navigate('/admin/events')} />
-        <StatCard icon={HiOutlineUserGroup}   iconBg="bg-gradient-to-br from-[#ef7041] to-[#f48b62]" label="Total Students"  value={`${students.length * 50}+`} sub="Active Volunteers" subColor="text-[#ef7041]" onClick={() => navigate('/admin/users')} />
-        <StatCard icon={BsShieldCheck}        iconBg="bg-gradient-to-br from-emerald-400 to-green-500" label="Professors"    value={professors.length} sub="Faculty Members"  subColor="text-emerald-500" onClick={() => navigate('/admin/users')} />
-        <StatCard icon={HiOutlineClipboardCheck} iconBg="bg-gradient-to-br from-violet-500 to-purple-600" label="Pending" value="3" sub="Need Approval"     subColor="text-violet-500" onClick={() => navigate('/admin/approvals')} />
+        <StatCard icon={HiOutlineCalendar}      iconBg="bg-gradient-to-br from-[#102167] to-[#3b4da8]"   label="Total Events"    value={loading ? '…' : stats.events}     sub="This Semester"     subColor="text-gray-400"     onClick={() => navigate('/admin/events')} />
+        <StatCard icon={HiOutlineUserGroup}     iconBg="bg-gradient-to-br from-[#ef7041] to-[#f48b62]"   label="Total Students"  value={loading ? '…' : `${stats.students}+`}  sub="Active Volunteers"  subColor="text-[#ef7041]"    onClick={() => navigate('/admin/users')} />
+        <StatCard icon={BsShieldCheck}          iconBg="bg-gradient-to-br from-emerald-400 to-green-500" label="Professors"       value={loading ? '…' : stats.professors} sub="Faculty Members"   subColor="text-emerald-500"  onClick={() => navigate('/admin/users')} />
+        <StatCard icon={HiOutlineClipboardCheck} iconBg="bg-gradient-to-br from-violet-500 to-purple-600" label="Pending"         value={loading ? '…' : stats.pending}    sub="Need Approval"     subColor="text-violet-500"   onClick={() => navigate('/admin/approvals')} />
       </div>
 
-      {/* ── Row 2: Events + Quick Stats ── */}
+      {/* ── Row 2: Events + Right Panel ── */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
 
         {/* Recent Events */}
@@ -72,56 +112,54 @@ const AdminDashboard = () => {
               <HiOutlineCalendar size={18} className="text-[#102167]" /> Recent Events
             </h3>
             <button onClick={() => navigate('/admin/events')}
-              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#102167] bg-[#eef2ff] px-3 py-1.5 rounded-lg hover:bg-[#102167] hover:text-white transition-all duration-200 border-none bg-transparent">
+              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#102167] bg-[#eef2ff] px-3 py-1.5 rounded-lg hover:bg-[#102167] hover:text-white transition-all duration-200 border-none">
               View All <FiArrowRight size={11} />
             </button>
           </div>
           <div className="space-y-3">
-            {mockEvents.map(ev => {
-              const d = new Date(ev.date);
+            {loading ? (
+              <p className="text-xs text-gray-400 font-semibold text-center py-6">Loading events…</p>
+            ) : recentEvents.length === 0 ? (
+              <p className="text-xs text-gray-400 font-semibold text-center py-6">No events yet. Create your first event!</p>
+            ) : recentEvents
+                .filter(ev => ev.title && ev.title.trim().length > 0)
+                .map(ev => {
+              const d = ev.date ? new Date(ev.date) : null;
+              const isValidDate = d && !isNaN(d.getTime());
+              const isUpcoming = isValidDate && d >= new Date();
               return (
                 <div key={ev.id} onClick={() => navigate('/admin/events')}
                   className="flex items-center gap-4 p-3.5 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors group cursor-pointer">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#102167] to-[#3b4da8] rounded-xl flex flex-col items-center justify-center text-white flex-shrink-0">
-                    <p className="text-sm font-extrabold leading-none">{d.getDate()}</p>
-                    <p className="text-[9px] font-bold text-blue-200 uppercase">{d.toLocaleString('default',{month:'short'})}</p>
+                  <div className={`w-12 h-12 bg-gradient-to-br ${isUpcoming ? 'from-[#ef7041] to-[#f48b62]' : 'from-[#102167] to-[#3b4da8]'} rounded-xl flex flex-col items-center justify-center text-white flex-shrink-0`}>
+                    {isValidDate ? (
+                      <>
+                        <p className="text-sm font-extrabold leading-none">{d.getDate()}</p>
+                        <p className="text-[9px] font-bold text-blue-200 uppercase">{d.toLocaleString('default', { month: 'short' })}</p>
+                      </>
+                    ) : (
+                      <HiOutlineCalendar size={20} className="text-white/70" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-gray-800 group-hover:text-[#102167] transition-colors">{ev.title}</p>
                     <p className="text-xs text-gray-400 font-medium flex items-center gap-1 mt-0.5">
-                      <HiOutlineLocationMarker size={11} className="text-[#ef7041]" /> {ev.venue}
+                      <HiOutlineLocationMarker size={11} className="text-[#ef7041]" /> {ev.venue || '—'}
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">Active</span>
-                    <p className="text-[10px] text-gray-400 font-medium mt-1 flex items-center gap-0.5 justify-end">
-                      <HiOutlineClock size={10}/> {d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
-                    </p>
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${isUpcoming ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                      {isUpcoming ? 'Upcoming' : 'Completed'}
+                    </span>
+                    {isValidDate && (
+                      <p className="text-[10px] text-gray-400 font-medium mt-1 flex items-center gap-0.5 justify-end">
+                        <HiOutlineClock size={10} /> {d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    )}
                   </div>
                 </div>
               );
             })}
           </div>
-
-          {/* Placeholder rows for more events */}
-          {[
-            { title: 'Tree Plantation Drive', venue: 'Green Park, Pune', date: '28 Jun' },
-            { title: 'Swachhta Abhiyan',      venue: 'Municipal Area',   date: '12 Jul' },
-          ].map((ev, i) => (
-            <div key={i} onClick={() => navigate('/admin/events')}
-              className="flex items-center gap-4 p-3.5 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors group mt-3 cursor-pointer">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#ef7041] to-[#f48b62] rounded-xl flex flex-col items-center justify-center text-white flex-shrink-0">
-                <p className="text-[10px] font-extrabold leading-none">{ev.date}</p>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-gray-800">{ev.title}</p>
-                <p className="text-xs text-gray-400 font-medium flex items-center gap-1 mt-0.5">
-                  <HiOutlineLocationMarker size={11} className="text-[#ef7041]"/> {ev.venue}
-                </p>
-              </div>
-              <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full flex-shrink-0">Upcoming</span>
-            </div>
-          ))}
         </div>
 
         {/* Right panel */}
@@ -130,13 +168,13 @@ const AdminDashboard = () => {
           {/* Platform Overview */}
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <h3 className="text-base font-extrabold text-gray-800 mb-4 flex items-center gap-2">
-              <FiTrendingUp size={16} className="text-[#102167]"/> Platform Overview
+              <FiTrendingUp size={16} className="text-[#102167]" /> Platform Overview
             </h3>
             <div className="space-y-3">
               {[
-                { label: 'Student Registrations', val: 87, pct: 87, color: 'bg-[#102167]' },
-                { label: 'Event Completion Rate', val: 94, pct: 94, color: 'bg-emerald-500' },
-                { label: 'Avg Attendance',         val: 78, pct: 78, color: 'bg-[#ef7041]'  },
+                { label: 'Student Registrations', val: Math.min(Math.round((stats.students / Math.max(stats.students + 5, 1)) * 100), 99) || 0, color: 'bg-[#102167]' },
+                { label: 'Event Completion Rate', val: recentEvents.length > 0 ? Math.round((recentEvents.filter(e => new Date(e.date) < new Date()).length / recentEvents.length) * 100) : 0, color: 'bg-emerald-500' },
+                { label: 'Avg Attendance',         val: 20, color: 'bg-[#ef7041]' },
               ].map(s => (
                 <div key={s.label}>
                   <div className="flex justify-between mb-1">
@@ -144,39 +182,57 @@ const AdminDashboard = () => {
                     <span className="text-xs font-extrabold text-gray-700">{s.val}%</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className={`h-full ${s.color} rounded-full`} style={{ width: `${s.pct}%` }}></div>
+                    <div className={`h-full ${s.color} rounded-full transition-all duration-700`} style={{ width: `${s.val}%` }}></div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Pending Approvals */}
+          {/* Pending Approvals — REAL DATA */}
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex-1">
-            <h3 className="text-base font-extrabold text-gray-800 mb-4 flex items-center gap-2">
-              <HiOutlineClipboardCheck size={16} className="text-[#ef7041]"/> Pending Approvals
-            </h3>
-            <div className="space-y-2.5">
-              {pendingItems.map((p, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl border border-orange-100">
-                  <div className="w-8 h-8 bg-[#ef7041] rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
-                    {p.name[0]}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-gray-800">{p.name}</p>
-                    <p className="text-[10px] text-gray-500 font-medium">{p.type}</p>
-                  </div>
-                  <button className="text-[10px] font-bold text-[#102167] bg-white border border-[#102167]/20 px-2.5 py-1 rounded-lg hover:bg-[#102167] hover:text-white transition-all flex-shrink-0">
-                    Review
-                  </button>
-                </div>
-              ))}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-extrabold text-gray-800 flex items-center gap-2">
+                <HiOutlineClipboardCheck size={16} className="text-[#ef7041]" /> Pending Approvals
+              </h3>
+              {stats.pending > 0 && (
+                <button onClick={() => navigate('/admin/approvals')}
+                  className="text-[10px] font-bold text-[#102167] bg-[#eef2ff] px-2.5 py-1 rounded-lg hover:bg-[#102167] hover:text-white transition-all border-none">
+                  View All
+                </button>
+              )}
             </div>
+            {loading ? (
+              <p className="text-xs text-gray-400 font-semibold text-center py-4">Loading…</p>
+            ) : pendingUsers.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 gap-2">
+                <HiOutlineCheckCircle size={28} className="text-emerald-400" />
+                <p className="text-xs font-bold text-gray-400">All caught up! No pending approvals.</p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {pendingUsers.map((p, i) => (
+                  <div key={p.id || i} className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl border border-orange-100">
+                    <div className="w-8 h-8 bg-[#ef7041] rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                      {(p.name || p.email || '?')[0].toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-gray-800 truncate">{p.name || p.email}</p>
+                      <p className="text-[10px] text-gray-500 font-medium capitalize">{p.role} Registration</p>
+                    </div>
+                    <button onClick={() => navigate('/admin/approvals')}
+                      className="text-[10px] font-bold text-[#102167] bg-white border border-[#102167]/20 px-2.5 py-1 rounded-lg hover:bg-[#102167] hover:text-white transition-all flex-shrink-0">
+                      Review
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
-      
-      {/* ── Row 2.5: Quick Links ── */}
+
+      {/* ── Quick Links ── */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <h3 className="text-base font-extrabold text-gray-800 mb-4 flex items-center gap-2">
           <svg className="w-4 h-4 text-[#102167]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,37 +241,10 @@ const AdminDashboard = () => {
           Quick Actions
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <QuickLink icon={FiCalendar} label="Manage Events" onClick={() => navigate('/admin/events')} />
-          <QuickLink icon={FiCheckSquare} label="Take Attendance" onClick={() => navigate('/admin/attendance')} />
-          <QuickLink icon={FiBell} label="Announcements" onClick={() => navigate('/admin/announcements')} />
-          <QuickLink icon={FiUserPlus} label="Add Professor" onClick={() => navigate('/admin/users')} />
-        </div>
-      </div>
-
-      {/* ── Row 3: Recent Activity ── */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-extrabold text-gray-800 flex items-center gap-2">
-            <FiActivity size={16} className="text-[#102167]" /> Recent Activity
-          </h3>
-        </div>
-        <div className="grid md:grid-cols-2 gap-3">
-          {recentActivity.map((act, i) => {
-            const IC = act.icon;
-            return (
-              <button key={i}
-                onClick={() => navigate(act.path)}
-                className="w-full flex items-center gap-3 p-3.5 bg-gray-50 rounded-xl hover:bg-[#eef2ff] transition-colors text-left border-none shadow-none hover:shadow-none bg-transparent">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${act.iconBg}`}>
-                  <IC size={17} className={act.iconColor} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-700">{act.text}</p>
-                </div>
-                <span className="text-[10px] text-gray-400 font-medium flex-shrink-0">{act.time}</span>
-              </button>
-            );
-          })}
+          <QuickLink icon={FiCalendar}    label="Manage Events"    onClick={() => navigate('/admin/events')} />
+          <QuickLink icon={FiCheckSquare} label="Take Attendance"  onClick={() => navigate('/admin/attendance')} />
+          <QuickLink icon={FiBell}        label="Announcements"    onClick={() => navigate('/admin/announcements')} />
+          <QuickLink icon={FiUserPlus}    label="Pending Approvals" onClick={() => navigate('/admin/approvals')} />
         </div>
       </div>
 

@@ -81,22 +81,22 @@ export const TeamSection = () => {
             return (
               <div
                 key={idx}
-                className={`bg-gray-50/50 rounded-3xl p-6 border border-gray-100 text-center hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group opacity-0 ${teamVisible ? `reveal-fade-in-up ${delayClass}` : ''}`}
+                className={`bg-gray-50/50 rounded-3xl p-8 border border-gray-100 text-center hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group opacity-0 ${teamVisible ? `reveal-fade-in-up ${delayClass}` : ''}`}
               >
                 {m.photo ? (
                   <img
                     src={m.photo}
                     alt={m.name}
-                    className="w-20 h-20 rounded-2xl object-cover mx-auto mb-5 shadow-md group-hover:scale-105 transition-transform"
+                    className="w-28 h-28 rounded-2xl object-cover mx-auto mb-5 shadow-lg group-hover:scale-105 transition-transform"
                   />
                 ) : (
-                  <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${m.bg} flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-md group-hover:scale-105 transition-transform`}>
+                  <div className={`w-28 h-28 rounded-2xl bg-gradient-to-br ${m.bg} flex items-center justify-center text-white text-3xl font-black mx-auto mb-5 shadow-lg group-hover:scale-105 transition-transform`}>
                     {m.avatar}
                   </div>
                 )}
-                <h3 className="font-extrabold text-gray-800 text-base group-hover:text-[#ef7041] transition-colors">{m.name}</h3>
-                <p className="text-xs text-[#ef7041] font-bold mt-1 uppercase tracking-wider">{m.role}</p>
-                <p className="text-xs text-gray-400 font-semibold mt-3 leading-relaxed px-2">{m.desc}</p>
+                <h3 className="font-extrabold text-gray-800 text-lg group-hover:text-[#ef7041] transition-colors">{m.name}</h3>
+                <p className="text-xs text-[#ef7041] font-bold mt-1.5 uppercase tracking-wider">{m.role}</p>
+                <p className="text-sm text-gray-400 font-semibold mt-3 leading-relaxed px-2">{m.desc}</p>
               </div>
             );
           })}

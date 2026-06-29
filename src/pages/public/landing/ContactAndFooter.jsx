@@ -1,11 +1,59 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import emailjs from '@emailjs/browser';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
 import nssLogo from '../../../assets/nss.png';
 import { FiFacebook, FiInstagram, FiYoutube } from 'react-icons/fi';
 
+// ── EmailJS credentials ──────────────────────────────────────────
+// 1. Go to https://emailjs.com → Sign up free with factualmayur@gmail.com
+// 2. Add Email Service (Gmail) → copy Service ID below
+// 3. Create Email Template → copy Template ID below
+// 4. Go to Account → API Keys → copy Public Key below
+const EMAILJS_SERVICE_ID  = 'service_01h7k8f';  // ✅ done
+const EMAILJS_TEMPLATE_ID = 'template_mdsnvdc';  // ✅ done
+const EMAILJS_PUBLIC_KEY  = 'ZEyIHVLxdFmX-6B0y'; // ✅ done
+// ────────────────────────────────────────────────────────────────
+
 const ContactAndFooter = () => {
-  const [leftRef, leftVisible] = useScrollReveal();
+  const [leftRef, leftVisible]   = useScrollReveal();
   const [rightRef, rightVisible] = useScrollReveal();
+
+  const [form, setForm]     = useState({ name: '', email: '', subject: '', message: '' });
+  const [status, setStatus] = useState('idle'); // idle | sending | success | error
+
+  const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.name || !form.email || !form.message) return;
+    setStatus('sending');
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          from_name:    form.name,
+          from_email:   form.email,
+          subject:      form.subject || 'NSS Contact Form',
+          message:      form.message,
+          to_name:      'NSS NBNSTIC',
+          reply_to:     form.email,
+          user_name:    form.name,
+          user_email:   form.email,
+          user_message: form.message,
+        },
+        EMAILJS_PUBLIC_KEY
+      );
+      setStatus('success');
+      setForm({ name: '', email: '', subject: '', message: '' });
+      setTimeout(() => setStatus('idle'), 5000);
+    } catch (err) {
+      console.error('EmailJS full error:', JSON.stringify(err), err?.status, err?.text, err?.message);
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 4000);
+    }
+  };
 
   const socialLinks = [
     { icon: <FiFacebook size={16} />,  url: 'https://www.facebook.com/computernbnssoe/', label: 'Facebook' },
@@ -26,14 +74,14 @@ const ContactAndFooter = () => {
 
           <div className="grid lg:grid-cols-2 gap-12">
             <div ref={leftRef} className={`space-y-5 opacity-0 ${leftVisible ? 'reveal-fade-in-right' : ''}`}>
-              <h3 className="text-xl font-extrabold text-[#102167]">NSS Unit — Samarth College</h3>
+              <h3 className="text-xl font-extrabold text-[#102167]">NSS Unit — NBNSTIC, Pune</h3>
               <p className="text-gray-500 leading-relaxed text-[15px]">
                 Have questions or want to volunteer? We'd love to hear from you.
               </p>
               {[
-                { icon: '📍', label: 'Address', value: 'Samarth College, Pune, Maharashtra 411001' },
+                { icon: '📍', label: 'Address', value: 'S. No. 10/1, Ambegaon (Bk.), Off Sinhgad Road, Pune – 411041, Maharashtra' },
                 { icon: '📞', label: 'Phone', value: '+91 98765 43210' },
-                { icon: '✉️', label: 'Email', value: 'nss@samarthcollege.edu.in' },
+                { icon: '✉️', label: 'Email', value: 'factualmayur@gmail.com' },
                 { icon: '🕐', label: 'Office Hours', value: 'Monday – Saturday, 9:00 AM – 5:00 PM' },
               ].map((c) => (
                 <div key={c.label} className="flex items-start gap-4 p-4 bg-[#fdf8f4] rounded-xl border border-[#f0e8de] shadow-sm hover:shadow transition-shadow">
@@ -48,32 +96,46 @@ const ContactAndFooter = () => {
 
             <div ref={rightRef} className={`bg-[#fdf8f4] rounded-2xl p-8 border border-[#f0e8de] opacity-0 ${rightVisible ? 'reveal-fade-in-left' : ''}`}>
               <h3 className="text-lg font-extrabold text-[#102167] mb-6">Send a Message</h3>
-              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert('Thank you for contacting NSS! Your message has been sent successfully. We will get back to you soon.'); e.target.reset(); }}>
+
+              {/* Success */}
+              {status === 'success' && (
+                <div className="mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm font-semibold flex items-center gap-2">
+                  ✅ Message sent! We'll get back to you soon.
+                </div>
+              )}
+              {/* Error */}
+              {status === 'error' && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-semibold flex items-center gap-2">
+                  ❌ Failed to send. Please try again or email us directly.
+                </div>
+              )}
+
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Name</label>
-                    <input type="text" placeholder="Your name"
+                    <input type="text" placeholder="Your name" value={form.name} onChange={set('name')} required
                       className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-100 text-sm font-medium focus:border-[#102167] focus:ring-4 focus:ring-[#102167]/10 outline-none transition-all" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Email</label>
-                    <input type="email" placeholder="Your email"
+                    <input type="email" placeholder="Your email" value={form.email} onChange={set('email')} required
                       className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-100 text-sm font-medium focus:border-[#102167] focus:ring-4 focus:ring-[#102167]/10 outline-none transition-all" />
                   </div>
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Subject</label>
-                  <input type="text" placeholder="Message subject"
+                  <input type="text" placeholder="Message subject" value={form.subject} onChange={set('subject')}
                     className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-100 text-sm font-medium focus:border-[#102167] focus:ring-4 focus:ring-[#102167]/10 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Message</label>
-                  <textarea rows={4} placeholder="Your message..."
+                  <textarea rows={4} placeholder="Your message..." value={form.message} onChange={set('message')} required
                     className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-100 text-sm font-medium focus:border-[#102167] focus:ring-4 focus:ring-[#102167]/10 outline-none transition-all resize-none" />
                 </div>
-                <button type="submit"
-                  className="w-full py-3.5 bg-[#102167] text-white font-bold rounded-xl hover:bg-[#ef7041] transition-all duration-300 shadow-lg hover:-translate-y-0.5 text-sm border-none cursor-pointer">
-                  Send Message
+                <button type="submit" disabled={status === 'sending'}
+                  className="w-full py-3.5 bg-[#102167] text-white font-bold rounded-xl hover:bg-[#ef7041] transition-all duration-300 shadow-lg hover:-translate-y-0.5 text-sm border-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+                  {status === 'sending' ? '⏳ Sending...' : 'Send Message'}
                 </button>
               </form>
             </div>

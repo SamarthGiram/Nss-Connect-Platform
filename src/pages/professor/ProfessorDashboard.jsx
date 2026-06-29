@@ -111,7 +111,7 @@ const ProfessorDashboard = () => {
 
             {/* Extra upcoming */}
             {[
-              { title: 'Tree Plantation Drive', venue: 'Green Park', date: '28 Jun', time: '09:00 AM' },
+              { title: 'Tree Plantation Drive', venue: 'Green Park', date: '30 Jun', time: '09:00 AM' },
               { title: 'Swachhta Abhiyan',      venue: 'Municipal Area', date: '12 Jul', time: '08:00 AM' },
             ].map((ev, i) => (
               <div key={i} onClick={() => navigate('/professor/events')}

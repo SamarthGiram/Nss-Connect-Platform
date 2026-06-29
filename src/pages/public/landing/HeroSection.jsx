@@ -172,32 +172,32 @@ const HeroSection = () => {
 
       {/* ── Bottom NSS Core Leadership Team Widget ── */}
       <div className="px-8 pb-8 z-10 w-full opacity-0 reveal-fade-in-up delay-500">
-        <div className="max-w-6xl mx-auto bg-white rounded-[32px] shadow-[0_16px_48px_rgba(0,0,0,0.04)] border border-gray-100/90 p-5 sm:p-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 text-center sm:text-left px-3">
+        <div className="max-w-6xl mx-auto bg-white rounded-[32px] shadow-[0_16px_48px_rgba(0,0,0,0.04)] border border-gray-100/90 p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6 text-center sm:text-left px-1">
             <div>
-              <h4 className="font-extrabold text-[#102167] text-sm sm:text-base">NSS Core Leadership</h4>
-              <p className="text-[10px] sm:text-xs text-gray-400 font-semibold mt-0.5">Meet the key coordinators steering our social service initiatives.</p>
+              <h4 className="font-extrabold text-[#102167] text-base sm:text-lg">NSS Core Leadership</h4>
+              <p className="text-xs sm:text-sm text-gray-400 font-semibold mt-0.5">Meet the key coordinators steering our social service initiatives.</p>
             </div>
             <div className="w-12 h-0.5 bg-[#ef7041] rounded-full hidden sm:block"></div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 text-center">
             {[
               { name: 'Prof. Atul Ballal', role: 'NSS Chief Officer', avatar: 'AB', bg: 'from-blue-700 to-indigo-700', photo: null },
               { name: 'Sahil Tikande', role: 'NSS Lead', avatar: 'ST', bg: 'from-[#102167] to-[#3b4da8]', photo: '/core leadership/sahil tikande.jpeg' },
               { name: 'Prathamesh Veer', role: 'Operational Lead', avatar: 'PV', bg: 'from-emerald-500 to-teal-500', photo: '/core leadership/prathamesh.jpeg' },
               { name: 'Rushikesh Tekale', role: 'Dadachi Shala Lead', avatar: 'RT', bg: 'from-[#ef7041] to-orange-500', photo: '/core leadership/rushikesh.jpeg' }
             ].map((m, idx) => (
-              <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50/50 rounded-2xl border border-gray-100/40 text-left">
+              <div key={idx} className="flex items-center gap-4 p-4 bg-gray-50/50 rounded-2xl border border-gray-100/40 text-left">
                 {m.photo ? (
-                  <img src={m.photo} alt={m.name} className="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-sm" />
+                  <img src={m.photo} alt={m.name} className="w-16 h-16 rounded-2xl object-cover flex-shrink-0 shadow-md" />
                 ) : (
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${m.bg} flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-sm`}>
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${m.bg} flex items-center justify-center text-white text-base font-black flex-shrink-0 shadow-md`}>
                     {m.avatar}
                   </div>
                 )}
                 <div className="overflow-hidden">
-                  <p className="font-extrabold text-gray-800 text-xs truncate leading-none">{m.name}</p>
-                  <p className="text-[9px] text-[#ef7041] font-bold mt-1.5 truncate uppercase tracking-wider leading-none">{m.role}</p>
+                  <p className="font-extrabold text-gray-800 text-sm truncate leading-tight">{m.name}</p>
+                  <p className="text-[10px] text-[#ef7041] font-bold mt-1.5 truncate uppercase tracking-wider leading-none">{m.role}</p>
                 </div>
               </div>
             ))}
