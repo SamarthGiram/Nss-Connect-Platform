@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { fetchEvents } from '../../services/eventsService';
-import { fetchStudentsForEvent, submitAttendance } from '../../services/attendanceService';
+import { fetchStudentsForEvent, submitAttendance, fetchEventAttendance } from '../../services/attendanceService';
 import { parseProfile } from '../../utils/avatarParser';
 import {
   HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineUserGroup,
-  HiOutlineCalendar, HiOutlineLocationMarker, HiOutlineSearch
+  HiOutlineCalendar, HiOutlineLocationMarker, HiOutlineSearch,
+  HiOutlineDownload
 } from 'react-icons/hi';
 import { FiSave, FiCheck, FiX } from 'react-icons/fi';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 
 
@@ -43,6 +47,24 @@ const TakeAttendance = () => {
       .then(setStudents)
       .catch(console.error);
   }, []);
+
+  // Fetch existing attendance when event changes
+  useEffect(() => {
+    if (selectedEvent) {
+      fetchEventAttendance(selectedEvent)
+        .then(data => {
+          const loadedAttendance = {};
+          data.forEach(r => {
+            loadedAttendance[r.student_id] = r.status;
+          });
+          setAttendance(loadedAttendance);
+          setSubmitted(false); // Reset submitted state on load
+        })
+        .catch(console.error);
+    } else {
+      setAttendance({});
+    }
+  }, [selectedEvent]);
 
   const event = events.find(e => e.id === selectedEvent);
 
@@ -84,6 +106,52 @@ const TakeAttendance = () => {
       setSubmitting(false);
     }
   };
+  const exportToExcel = () => {
+    if (!event) return;
+    const data = students.map(s => {
+      const parsed = parseProfile(s);
+      return {
+        Name: s.name,
+        'Roll Number': s.roll_number || '-',
+        Department: parsed.department || '-',
+        Status: attendance[s.id] || 'Absent'
+      };
+    });
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance');
+    XLSX.writeFile(workbook, `${event.title}_Attendance.xlsx`);
+  };
+
+  const exportToPDF = () => {
+    if (!event) return;
+    const doc = new jsPDF();
+    doc.text(`Attendance Report: ${event.title}`, 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Date: ${new Date(event.date).toLocaleDateString()}`, 14, 22);
+    doc.text(`Venue: ${event.venue}`, 14, 27);
+    
+    const tableData = students.map((s, index) => {
+      const parsed = parseProfile(s);
+      return [
+        index + 1,
+        s.name,
+        s.roll_number || '-',
+        parsed.department || '-',
+        attendance[s.id] || 'Absent'
+      ];
+    });
+
+    autoTable(doc, {
+      startY: 32,
+      head: [['#', 'Name', 'Roll Number', 'Department', 'Status']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [16, 33, 103] }, // #102167
+    });
+
+    doc.save(`${event.title}_Attendance.pdf`);
+  };
 
   return (
     <div className="space-y-5">
@@ -118,6 +186,13 @@ const TakeAttendance = () => {
               <HiOutlineUserGroup size={13} className="text-violet-500"/>
               {students.length} students
             </div>
+            <div className="flex-1" />
+            <button onClick={exportToPDF} className="flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-lg transition-colors border-none cursor-pointer">
+              <HiOutlineDownload size={14} /> PDF
+            </button>
+            <button onClick={exportToExcel} className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-3 py-2 rounded-lg transition-colors border-none cursor-pointer">
+              <HiOutlineDownload size={14} /> Excel
+            </button>
           </div>
         )}
       </div>
@@ -236,15 +311,15 @@ const TakeAttendance = () => {
                 <span className="mx-2">·</span>
                 <span className="font-extrabold text-red-400">{absentCount} absent</span>
                 <span className="mx-2">·</span>
-                <span className="font-extrabold text-amber-500">{unmarked} unmarked</span>
+                <span className="font-extrabold text-amber-500">{unmarked} unmarked (defaults to Absent)</span>
               </div>
               <button onClick={handleSubmit}
-                disabled={unmarked > 0}
+                disabled={submitting}
                 className={`flex items-center gap-2 px-6 py-2.5 text-sm font-bold rounded-xl transition-all shadow-md
-                  ${unmarked > 0
+                  ${submitting
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-[#102167] text-white hover:bg-[#ef7041] hover:shadow-lg'}`}>
-                <FiSave size={14}/> Submit Attendance
+                <FiSave size={14}/> {submitting ? 'Submitting...' : 'Submit Attendance'}
               </button>
             </div>
           </div>
